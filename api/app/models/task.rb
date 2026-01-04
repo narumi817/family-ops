@@ -7,6 +7,7 @@ class Task < ApplicationRecord
   }
 
   # アソシエーション
+  belongs_to :family, optional: true
   has_many :logs, dependent: :restrict_with_error
   has_many :family_task_points, dependent: :destroy
   has_many :families, through: :family_task_points
@@ -19,5 +20,16 @@ class Task < ApplicationRecord
   # @param category [Symbol, Integer] カテゴリ（:childcare, :housework, :other または 1, 2, 3）
   # @return [ActiveRecord::Relation] 指定されたカテゴリのタスクのコレクション
   scope :by_category, ->(category) { where(category: category) }
+
+  # @return [ActiveRecord::Relation] 全家族共通のタスクのコレクション
+  scope :global, -> { where(family_id: nil) }
+
+  # @param family_id [Integer] 家族ID
+  # @return [ActiveRecord::Relation] 指定された家族のタスク（全家族共通 + 家族固有）のコレクション
+  scope :for_family, ->(family_id) { where(family_id: [nil, family_id]) }
+
+  # @param family_id [Integer] 家族ID
+  # @return [ActiveRecord::Relation] 指定された家族固有のタスクのコレクション
+  scope :by_family, ->(family_id) { where(family_id: family_id) }
 end
 

@@ -42,7 +42,7 @@ FamilyOpsアプリケーションのデータベーススキーマ定義書で�
 
 ### tasks
 
-タスク情報を管理するテーブル。
+タスク情報を管理するテーブル。全家族共通のタスクと家族固有のタスクを管理する。
 
 | カラム名 | 論理名 | 型 | NULL | デフォルト | 説明 |
 |---------|--------|-----|------|-----------|------|
@@ -50,11 +50,16 @@ FamilyOpsアプリケーションのデータベーススキーマ定義書で�
 | name | タスク名 | string | false | - | - |
 | description | 説明 | text | true | - | - |
 | category | カテゴリ | integer | false | 0 | Enum: childcare=1, housework=2, other=3 |
+| family_id | 家族ID | bigint | true | - | 外部キー: families.id（NULLの場合は全家族共通のタスク） |
 | created_at | 作成日時 | datetime | false | - | - |
 | updated_at | 更新日時 | datetime | false | - | - |
 
 **インデックス:**
 - `tasks_category_idx`: `category`
+- `tasks_family_id_fk`: `family_id`
+
+**外部キー制約:**
+- `tasks_family_id_fk`: `families.id` ON DELETE CASCADE
 
 **Enum定義:**
 - `childcare` (1): 育児
@@ -164,6 +169,7 @@ erDiagram
     users }o--o{ families : "belongs to many (through family_members)"
     
     tasks ||--o{ logs : "has many"
+    tasks }o--|| families : "belongs to (optional)"
     tasks }o--o{ families : "belongs to many (through family_task_points)"
     tasks ||--o{ family_task_points : "has many"
     
@@ -187,6 +193,7 @@ erDiagram
         string name
         text description "nullable"
         integer category "Enum: childcare(1), housework(2), other(3)"
+        bigint family_id FK "nullable"
         datetime created_at
         datetime updated_at
     }
@@ -235,6 +242,7 @@ erDiagram
 - `users` → `family_members`: 1人のユーザーは複数の家族に所属できる（ON DELETE CASCADE）
 - `tasks` → `logs`: 1つのタスクは複数のログを持つ（ON DELETE RESTRICT）
 - `tasks` → `family_task_points`: 1つのタスクは複数の家族でポイント設定される（ON DELETE RESTRICT）
+- `families` → `tasks`: 1つの家族は複数のタスクを持つ（ON DELETE CASCADE、family_idがNULLの場合は全家族共通）
 - `families` → `family_members`: 1つの家族は複数のメンバーを持つ（ON DELETE CASCADE）
 - `families` → `family_task_points`: 1つの家族は複数のタスクポイント設定を持つ（ON DELETE CASCADE）
 
@@ -248,7 +256,7 @@ erDiagram
 ### CASCADE（親レコード削除時に子レコードも削除）
 
 - `users` 削除時 → `family_members` も削除
-- `families` 削除時 → `family_members`, `family_task_points` も削除
+- `families` 削除時 → `tasks`（家族固有のタスク）, `family_members`, `family_task_points` も削除
 
 ### RESTRICT（親レコード削除時にエラー）
 
@@ -269,6 +277,10 @@ erDiagram
    - `family_id` と `task_id` の組み合わせはユニーク（1つの家族は同じタスクのポイントを1つだけ設定可能）
    - デフォルトポイントは 1
 
-4. **logs テーブル**
+4. **tasks テーブル**
+   - `family_id` が NULL の場合は全家族共通のタスク
+   - `family_id` が設定されている場合はその家族固有のタスク（他の家族には表示されない）
+
+5. **logs テーブル**
    - `user_id` と `task_id` の削除は制限されているため、事前にログを削除する必要がある
 

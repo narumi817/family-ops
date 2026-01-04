@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_03_142615) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_04_141625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_03_142615) do
   create_table "family_members", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "family_id", null: false
-    t.integer "role", default: 4, null: false
+    t.integer "role", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["family_id"], name: "index_family_members_on_family_id"
@@ -60,7 +60,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_03_142615) do
     t.integer "category", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "family_id"
     t.index ["category"], name: "index_tasks_on_category"
+    t.index ["family_id"], name: "index_tasks_on_family_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -82,4 +84,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_03_142615) do
   add_foreign_key "family_task_points", "tasks", on_delete: :restrict
   add_foreign_key "logs", "tasks", on_delete: :restrict
   add_foreign_key "logs", "users", on_delete: :restrict
+  add_foreign_key "tasks", "families", on_delete: :cascade
 end
