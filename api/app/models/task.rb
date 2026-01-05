@@ -15,6 +15,7 @@ class Task < ApplicationRecord
   # バリデーション
   validates :name, presence: true
   validates :category, presence: true
+  validates :points, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
   # スコープ
   # @param category [Symbol, Integer] カテゴリ（:childcare, :housework, :other または 1, 2, 3）
@@ -31,5 +32,14 @@ class Task < ApplicationRecord
   # @param family_id [Integer] 家族ID
   # @return [ActiveRecord::Relation] 指定された家族固有のタスクのコレクション
   scope :by_family, ->(family_id) { where(family_id: family_id) }
+
+  # 指定された家族に対するタスクのポイントを取得する
+  # family_task_pointsに設定がある場合はそれを優先、なければtasksのデフォルトポイントを返す
+  # @param family_id [Integer] 家族ID
+  # @return [Integer] ポイント数
+  def points_for_family(family_id)
+    family_task_point = family_task_points.find_by(family_id: family_id)
+    family_task_point ? family_task_point.points : points
+  end
 end
 
