@@ -9,9 +9,13 @@
 unless Rails.env.test?
   Rails.application.config.middleware.insert_before 0, Rack::Cors do
     allow do
-      # 開発環境では localhost からのアクセスを許可
+      # 開発環境では localhost からのアクセスを許可（Nuxtは3001ポートで動作）
       # 本番環境では環境変数 ALLOWED_ORIGINS で指定（例: export ALLOWED_ORIGINS="https://example.com,https://www.example.com"）
-      origins Rails.env.development? ? /http:\/\/localhost(:\d+)?/ : ENV.fetch("ALLOWED_ORIGINS", "").split(",")
+      if Rails.env.development?
+        origins "http://localhost:3001", "http://localhost:3000", /http:\/\/localhost(:\d+)?/
+      else
+        origins ENV.fetch("ALLOWED_ORIGINS", "").split(",")
+      end
 
       # 本番環境で直接オリジンを指定する場合の例（上記の行をコメントアウトして、こちらを有効化）:
       # origins "https://example.com", "https://www.example.com"
