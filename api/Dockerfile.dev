@@ -35,6 +35,16 @@ RUN bundle install
 # Copy application code
 COPY . .
 
+# Create .bashrc with Rails console aliases for interactive shells
+RUN echo '# Rails aliases' >> ~/.bashrc && \
+    echo 'alias rails="bundle exec rails"' >> ~/.bashrc && \
+    echo 'alias rails-c="bundle exec rails console"' >> ~/.bashrc && \
+    echo 'alias rails-c="bundle exec rails c"' >> ~/.bashrc && \
+    echo '# Rails aliases' >> /root/.bashrc && \
+    echo 'alias rails="bundle exec rails"' >> /root/.bashrc && \
+    echo 'alias rails-c="bundle exec rails console"' >> /root/.bashrc && \
+    echo 'alias rails-c="bundle exec rails c"' >> /root/.bashrc
+
 # Expose port 3000
 EXPOSE 3000
 
