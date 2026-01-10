@@ -52,5 +52,7 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # Disable host authorization in test environment (RSpec uses www.example.com by default)
-  config.action_dispatch.hosts_authorization = { exclude: ->(request) { true } }
+  # Rails 8では、テスト環境でwww.example.comを許可
+  config.action_dispatch.hosts_authorization = false
+  config.hosts = ["www.example.com"] if config.respond_to?(:hosts)
 end

@@ -24,5 +24,10 @@ end
 
 RSpec.configure do |config|
   config.include RequestSpecHelper, type: :request
+
+  # Host Authorizationを回避するため、すべてのrequest specでHostヘッダーを設定
+  config.before(:each, type: :request) do
+    host! 'www.example.com'
+  end
 end
 
