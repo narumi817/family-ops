@@ -1,6 +1,11 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
+
+# RSpec実行時は必ずtest環境にする
+# docker-compose.ymlでRAILS_ENV=developmentが設定されている場合でも、
+# RSpec実行時はtest環境を使用するため、強制的にtestに設定する
+ENV['RAILS_ENV'] = 'test'
+
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?

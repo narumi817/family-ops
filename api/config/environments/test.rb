@@ -42,6 +42,9 @@ Rails.application.configure do
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
+  # Log to test.log file
+  config.logger = ActiveSupport::Logger.new(Rails.root.join("log", "test.log"), level: :debug)
+
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 
@@ -52,7 +55,6 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # Disable host authorization in test environment (RSpec uses www.example.com by default)
-  # Rails 8では、テスト環境でwww.example.comを許可
-  config.action_dispatch.hosts_authorization = false
-  config.hosts = ["www.example.com"] if config.respond_to?(:hosts)
+  # テスト中は全てのホストを許可する
+  config.hosts.clear
 end
