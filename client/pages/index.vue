@@ -1,62 +1,74 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
-        FamilyOps
-      </h1>
-      
-      <div class="space-y-4">
-        <div class="p-4 bg-blue-50 rounded-lg">
-          <p class="text-sm text-gray-600 mb-2">
-            Tailwind CSSが正しく動作しています
-          </p>
-          <div class="flex items-center space-x-2">
-            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span class="text-sm text-gray-700">スタイル適用済み</span>
-          </div>
-        </div>
-
+  <div class="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-yellow-50">
+    <div class="container mx-auto px-4 py-8">
+      <!-- ヘッダー -->
+      <header class="flex justify-between items-center mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">FamilyOps</h1>
         <button
-          @click="testApiConnection"
-          :disabled="loading"
-          class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+          v-if="authStore.loggedIn"
+          @click="handleLogout"
+          class="min-h-[48px] px-4 sm:px-6 py-3 bg-white rounded-lg shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-200 text-gray-700 text-sm sm:text-base font-medium touch-manipulation"
         >
-          {{ loading ? '接続中...' : 'Rails APIとの疎通確認' }}
+          ログアウト
         </button>
+        <NuxtLink
+          v-else
+          to="/login"
+          class="min-h-[48px] px-4 sm:px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 text-white rounded-lg shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-200 text-sm sm:text-base font-medium touch-manipulation inline-flex items-center justify-center"
+        >
+          ログイン
+        </NuxtLink>
+      </header>
 
-        <div v-if="apiResponse" class="mt-4 p-4 bg-gray-50 rounded-lg">
-          <p class="text-sm font-semibold text-gray-700 mb-2">APIレスポンス:</p>
-          <pre class="text-xs text-gray-600 overflow-auto">{{ JSON.stringify(apiResponse, null, 2) }}</pre>
+      <!-- メインコンテンツ -->
+      <div v-if="authStore.loggedIn" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full mb-4">
+            <svg
+              class="w-10 h-10 sm:w-12 sm:h-12 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+            ようこそ、{{ authStore.user?.name }}さん！
+          </h2>
+          <p class="text-sm sm:text-base text-gray-600">{{ authStore.user?.email }}</p>
         </div>
+      </div>
 
-        <div v-if="apiError" class="mt-4 p-4 bg-red-50 rounded-lg">
-          <p class="text-sm font-semibold text-red-700 mb-2">エラー:</p>
-          <p class="text-xs text-red-600">{{ apiError }}</p>
-        </div>
+      <div v-else class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 text-center">
+        <p class="text-sm sm:text-base text-gray-600 mb-6">ログインして、家族の毎日を記録しましょう</p>
+        <NuxtLink
+          to="/login"
+          class="inline-flex items-center justify-center min-h-[56px] px-6 py-4 bg-gradient-to-r from-orange-400 to-pink-400 text-white rounded-lg shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-200 text-base font-semibold touch-manipulation"
+        >
+          ログイン画面へ
+        </NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const loading = ref(false)
-const apiResponse = ref<any>(null)
-const apiError = ref<string | null>(null)
+const authStore = useAuthStore()
+const router = useRouter()
 
-const testApiConnection = async () => {
-  loading.value = true
-  apiResponse.value = null
-  apiError.value = null
-
-  try {
-    // Rails APIのヘルスチェックエンドポイントをテスト（プロキシ経由）
-    const data = await $fetch('/api/up')
-    apiResponse.value = data
-  } catch (error: any) {
-    apiError.value = error.message || '予期しないエラーが発生しました'
-  } finally {
-    loading.value = false
-  }
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
 }
-</script>
 
+// ページ読み込み時にログイン状態を確認
+onMounted(async () => {
+  await authStore.checkLoginStatus()
+})
+</script>

@@ -6,6 +6,7 @@ export const useApi = () => {
     return useFetch<T>(url, {
       baseURL,
       ...options,
+      credentials: 'include', // Cookie認証のために必要
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
