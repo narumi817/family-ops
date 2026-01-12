@@ -9,12 +9,15 @@
 - [x] Rails 8 API専用プロジェクトの作成
 - [x] PostgreSQL設定（database.yml）
 - [x] RSpecのセットアップ
+  - [x] APIモードに適した設定
+  - [x] Request spec用のヘルパー作成
 - [x] FactoryBotの設定
 - [x] solid_cache/solid_queueの設定確認
 - [x] rack-corsの設定（CORS対応）
 - [x] bcryptの有効化（標準認証）
 - [x] Docker Composeの設定（開発環境）
 - [x] テスト環境のHost Authorization設定
+- [x] テスト環境のログ設定（test.logへの出力）
 
 ### Nuxt 3 フロントエンド (client/)
 
@@ -52,11 +55,12 @@
   - [x] has_secure_passwordの設定
   - [x] バリデーション（email, password）
   - [x] OAuth対応のバリデーション（provider/uid or password_digest必須）
-- [ ] 認証コントローラーの作成
-  - [ ] サインアップ（POST /api/auth/signup）
-  - [ ] ログイン（POST /api/auth/login）
-  - [ ] ログアウト（DELETE /api/auth/logout）
-  - [ ] セッション管理
+- [x] 認証コントローラーの作成
+  - [ ] サインアップ（POST /api/v1/signup）
+  - [x] ログイン（POST /api/v1/login）
+  - [x] ログアウト（DELETE /api/v1/logout）
+  - [x] ログイン状態確認（GET /api/v1/logged_in）
+  - [x] セッション管理（Cookieベース）
 - [ ] JWT認証の実装（オプション）
   - [ ] jwt gemの追加
   - [ ] トークン生成・検証ロジック
@@ -102,12 +106,13 @@
 
 ### 認証関連
 
-- [ ] POST /api/auth/signup - ユーザー登録
-- [ ] POST /api/auth/login - ログイン
-- [ ] DELETE /api/auth/logout - ログアウト
-- [ ] GET /api/auth/me - 現在のユーザー情報取得
-- [ ] GET /api/auth/google - Google認証開始
-- [ ] GET /api/auth/google/callback - Google認証コールバック
+- [ ] POST /api/v1/signup - ユーザー登録
+- [x] POST /api/v1/login - ログイン
+- [x] DELETE /api/v1/logout - ログアウト
+- [x] GET /api/v1/logged_in - ログイン状態確認
+- [ ] GET /api/v1/me - 現在のユーザー情報取得（logged_inで代替可能）
+- [ ] GET /api/v1/auth/google - Google認証開始
+- [ ] GET /api/v1/auth/google/callback - Google認証コールバック
 
 ### ユーザー関連
 
@@ -161,7 +166,11 @@
 
 ### リクエストテスト
 
-- [ ] 認証関連のテスト
+- [x] 認証関連のテスト（SessionsController）
+  - [x] ログイン成功時のテスト
+  - [x] ログイン失敗時のテスト
+  - [x] ログアウトのテスト
+  - [x] ログイン状態確認のテスト
 - [ ] ユーザー関連のテスト
 - [ ] タスク関連のテスト
 - [ ] ログ関連のテスト
@@ -170,7 +179,7 @@
 
 ### Factory定義
 
-- [ ] User Factory
+- [x] User Factory
 - [ ] Task Factory
 - [ ] Log Factory
 - [ ] Family Factory
@@ -181,10 +190,13 @@
 
 ### 認証画面
 
-- [ ] ログイン画面
+- [x] ログイン画面
+  - [x] モバイルファーストデザイン
+  - [x] 片手操作しやすいボタンサイズ
+  - [x] 温かみのあるデザイン
 - [ ] サインアップ画面
 - [ ] Google認証ボタン
-- [ ] 認証状態管理（Pinia）
+- [x] 認証状態管理（Pinia）
 
 ### ダッシュボード
 
