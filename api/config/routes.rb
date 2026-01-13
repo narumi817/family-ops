@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       post "login", to: "sessions#create"
       delete "logout", to: "sessions#destroy"
       get "logged_in", to: "sessions#logged_in"
+
+      # ランダムな労いメッセージを返す
+      resource :greeting, only: [:show], controller: 'greeting'
     end
   end
 
