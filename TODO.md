@@ -130,11 +130,11 @@
 
 ### ログ関連
 
-- [ ] GET /api/logs - ログ一覧（フィルタリング対応）
-- [ ] GET /api/logs/:id - ログ詳細
-- [ ] POST /api/logs - ログ作成
-- [ ] PATCH /api/logs/:id - ログ更新
-- [ ] DELETE /api/logs/:id - ログ削除
+- [ ] GET /api/v1/logs - ログ一覧（フィルタリング対応）
+- [ ] GET /api/v1/logs/:id - ログ詳細
+- [x] POST /api/v1/logs - ログ作成
+- [ ] PATCH /api/v1/logs/:id - ログ更新
+- [ ] DELETE /api/v1/logs/:id - ログ削除
 
 ### 家族関連
 
@@ -173,14 +173,15 @@
   - [x] ログイン状態確認のテスト
 - [ ] ユーザー関連のテスト
 - [ ] タスク関連のテスト
-- [ ] ログ関連のテスト
+- [x] ログ関連のテスト
+  - [x] POST /api/v1/logs のテスト（正常系・異常系）
 - [ ] 家族関連のテスト
 - [ ] ポイント設定関連のテスト
 
 ### Factory定義
 
 - [x] User Factory
-- [ ] Task Factory
+- [x] Task Factory
 - [ ] Log Factory
 - [ ] Family Factory
 - [ ] FamilyMember Factory

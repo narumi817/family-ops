@@ -14,6 +14,9 @@ Rails.application.routes.draw do
 
       # ランダムな労いメッセージを返す
       resource :greeting, only: [:show], controller: 'greeting'
+
+      # 家事ログ
+      resources :logs, only: [:create]
     end
   end
 
