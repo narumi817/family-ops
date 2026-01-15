@@ -17,6 +17,11 @@ Rails.application.routes.draw do
 
       # 家事ログ
       resources :logs, only: [:create]
+
+      # 家族関連
+      namespace :family do
+        resources :logs, only: [:index]
+      end
     end
   end
 

@@ -130,7 +130,7 @@
 
 ### ログ関連
 
-- [ ] GET /api/v1/logs - ログ一覧（フィルタリング対応）
+- [x] GET /api/v1/family/logs - 家族のログ一覧（フィルタリング・ページング対応）
 - [ ] GET /api/v1/logs/:id - ログ詳細
 - [x] POST /api/v1/logs - ログ作成
 - [ ] PATCH /api/v1/logs/:id - ログ更新
@@ -175,6 +175,7 @@
 - [ ] タスク関連のテスト
 - [x] ログ関連のテスト
   - [x] POST /api/v1/logs のテスト（正常系・異常系）
+  - [x] GET /api/v1/family/logs のテスト（正常系・異常系）
 - [ ] 家族関連のテスト
 - [ ] ポイント設定関連のテスト
 
@@ -182,9 +183,9 @@
 
 - [x] User Factory
 - [x] Task Factory
-- [ ] Log Factory
-- [ ] Family Factory
-- [ ] FamilyMember Factory
+- [x] Log Factory
+- [x] Family Factory
+- [x] FamilyMember Factory
 - [ ] FamilyTaskPoint Factory
 
 ## 🎨 フロントエンド実装

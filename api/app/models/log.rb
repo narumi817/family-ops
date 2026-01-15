@@ -22,5 +22,43 @@ class Log < ApplicationRecord
 
   # @return [ActiveRecord::Relation] 実行日時の降順でソートされたログのコレクション
   scope :recent, -> { order(performed_at: :desc) }
+
+  # @param user_ids [Array<Integer>] ユーザーIDの配列
+  # @return [ActiveRecord::Relation] 指定されたユーザーIDのいずれかに該当するログのコレクション
+  scope :for_family_users, ->(user_ids) { where(user_id: user_ids) }
+
+  # @param date [Date, String] 日付（DateオブジェクトまたはYYYY-MM-DD形式の文字列）
+  # @return [ActiveRecord::Relation] 指定された日付のログのコレクション
+  scope :by_date, ->(date) {
+    date = date.is_a?(String) ? Date.parse(date) : date
+    where(performed_at: date.beginning_of_day..date.end_of_day)
+  }
+
+  class << self
+    # 家族のログ一覧を取得する
+    # @param family_user_ids [Array<Integer>] 家族のユーザーIDの配列
+    # @param date [String, nil] 日付（YYYY-MM-DD形式、オプション）
+    # @param start_date [String, nil] 開始日（YYYY-MM-DD形式、オプション）
+    # @param end_date [String, nil] 終了日（YYYY-MM-DD形式、オプション）
+    # @return [ActiveRecord::Relation] フィルタリングされたログのコレクション
+    def for_family_with_filters(family_user_ids, date: nil, start_date: nil, end_date: nil)
+      logs = includes(:user, :task).for_family_users(family_user_ids)
+
+      if date.present?
+        logs = logs.by_date(date)
+      elsif start_date.present? && end_date.present?
+        start = Date.parse(start_date).beginning_of_day
+        end_time = Date.parse(end_date).end_of_day
+        logs = logs.by_date_range(start, end_time)
+      elsif start_date.present?
+        start = Date.parse(start_date).beginning_of_day
+        logs = logs.where(performed_at: start..Time.current)
+      end
+
+      logs
+    rescue ArgumentError, Date::Error
+      logs
+    end
+  end
 end
 
