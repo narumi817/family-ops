@@ -41,22 +41,25 @@ class Log < ApplicationRecord
     # @param start_date [String, nil] 開始日（YYYY-MM-DD形式、オプション）
     # @param end_date [String, nil] 終了日（YYYY-MM-DD形式、オプション）
     # @return [ActiveRecord::Relation] フィルタリングされたログのコレクション
+    # @note 日付パースで例外が発生した場合、日付フィルタを適用せずに全件を返す
     def for_family_with_filters(family_user_ids, date: nil, start_date: nil, end_date: nil)
       logs = includes(:user, :task).for_family_users(family_user_ids)
 
-      if date.present?
-        logs = logs.by_date(date)
-      elsif start_date.present? && end_date.present?
-        start = Date.parse(start_date).beginning_of_day
-        end_time = Date.parse(end_date).end_of_day
-        logs = logs.by_date_range(start, end_time)
-      elsif start_date.present?
-        start = Date.parse(start_date).beginning_of_day
-        logs = logs.where(performed_at: start..Time.current)
+      begin
+        if date.present?
+          logs = logs.by_date(date)
+        elsif start_date.present? && end_date.present?
+          start = Date.parse(start_date).beginning_of_day
+          end_time = Date.parse(end_date).end_of_day
+          logs = logs.by_date_range(start, end_time)
+        elsif start_date.present?
+          start = Date.parse(start_date).beginning_of_day
+          logs = logs.where(performed_at: start..Time.current)
+        end
+      rescue ArgumentError, Date::Error
+        # 日付パースで例外が発生した場合、日付フィルタを適用せずにそのまま返す
       end
 
-      logs
-    rescue ArgumentError, Date::Error
       logs
     end
   end
