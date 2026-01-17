@@ -46,6 +46,10 @@
 - [x] family_membersテーブルの設計・マイグレーション
   - [x] roleカラム（integer + Enum）
 - [x] family_task_pointsテーブルの設計・マイグレーション
+- [ ] email_verificationsテーブルの設計・マイグレーション
+  - [ ] 基本カラム（user_id, email, token, token_expires_at, verified_at）
+- [ ] family_invitationsテーブルの設計・マイグレーション
+  - [ ] 基本カラム（family_id, email, token, token_expires_at, invited_by, accepted_at）
 
 ## 🔐 認証機能
 
@@ -56,11 +60,25 @@
   - [x] バリデーション（email, password）
   - [x] OAuth対応のバリデーション（provider/uid or password_digest必須）
 - [x] 認証コントローラーの作成
-  - [ ] サインアップ（POST /api/v1/signup）
   - [x] ログイン（POST /api/v1/login）
   - [x] ログアウト（DELETE /api/v1/logout）
   - [x] ログイン状態確認（GET /api/v1/logged_in）
   - [x] セッション管理（Cookieベース）
+- [ ] サインアップ機能の実装
+  - [ ] メールアドレス確認機能
+    - [ ] トークン生成・検証ロジック
+    - [ ] メール送信機能（ActionMailer）
+  - [ ] 画面からのサインアップ（最初の家族メンバー）
+    - [ ] SignupControllerの作成
+    - [ ] メールアドレス登録・確認メール送信
+    - [ ] メールアドレス認証
+    - [ ] ユーザー情報登録完了（Family作成含む）
+  - [ ] 招待によるサインアップ（二人目以降）
+    - [ ] FamilyInvitationモデルの作成
+    - [ ] InvitationsControllerの作成
+    - [ ] 招待メール送信
+    - [ ] 招待トークン検証
+    - [ ] 招待受諾完了（既存Familyに紐付け）
 - [ ] JWT認証の実装（オプション）
   - [ ] jwt gemの追加
   - [ ] トークン生成・検証ロジック
@@ -101,12 +119,30 @@
   - [x] アソシエーション定義
   - [x] バリデーション
   - [x] ユニーク制約
+- [ ] EmailVerificationモデル
+  - [ ] アソシエーション定義
+  - [ ] バリデーション
+  - [ ] トークン生成・検証ロジック（クラスメソッド）
+  - [ ] スコープ・メソッド
+- [ ] FamilyInvitationモデル
+  - [ ] アソシエーション定義
+  - [ ] バリデーション
+  - [ ] トークン生成・検証ロジック（クラスメソッド）
+  - [ ] スコープ・メソッド
 
 ## 🛣️ APIエンドポイント実装
 
 ### 認証関連
 
 - [ ] POST /api/v1/signup - ユーザー登録
+  - [ ] 画面からのサインアップ
+    - [ ] POST /api/v1/signup/email - メールアドレス登録・確認メール送信
+    - [ ] GET /api/v1/signup/verify - メールアドレス認証
+    - [ ] POST /api/v1/signup/complete - ユーザー情報登録完了
+  - [ ] 招待によるサインアップ
+    - [ ] POST /api/v1/families/:id/invitations - 招待メール送信
+    - [ ] GET /api/v1/invitations/verify - 招待トークン検証
+    - [ ] POST /api/v1/invitations/complete - 招待受諾完了
 - [x] POST /api/v1/login - ログイン
 - [x] DELETE /api/v1/logout - ログアウト
 - [x] GET /api/v1/logged_in - ログイン状態確認
@@ -163,6 +199,8 @@
 - [ ] Familyモデルのテスト
 - [ ] FamilyMemberモデルのテスト
 - [ ] FamilyTaskPointモデルのテスト
+- [ ] EmailVerificationモデルのテスト
+- [ ] FamilyInvitationモデルのテスト
 
 ### リクエストテスト
 
@@ -187,6 +225,8 @@
 - [x] Family Factory
 - [x] FamilyMember Factory
 - [ ] FamilyTaskPoint Factory
+- [ ] EmailVerification Factory
+- [ ] FamilyInvitation Factory
 
 ## 🎨 フロントエンド実装
 
