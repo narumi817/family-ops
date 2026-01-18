@@ -1,0 +1,18 @@
+FamilyOpsへようこそ！
+
+メールアドレスの確認のため、以下のリンクをクリックしてください。
+
+<% 
+  url_options = Rails.application.config.action_mailer.default_url_options
+  base_url = url_options[:port] ? "#{url_options[:host]}:#{url_options[:port]}" : url_options[:host]
+%>
+<%= "#{base_url}/api/v1/signup/verify?token=#{@token}" %>
+
+※ このリンクは24時間有効です。
+
+もしこのメールに心当たりがない場合は、メールを破棄してください。
+
+---
+
+FamilyOps
+家族の毎日を、もっと楽しく

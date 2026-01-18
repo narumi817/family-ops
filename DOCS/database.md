@@ -53,7 +53,7 @@ FamilyOpsアプリケーションのデータベーススキーマ定義書で�
 | user_id | ユーザーID | bigint | true | - | 外部キー: users.id（ユーザー未作成時はNULL） |
 | email | メールアドレス | string | false | - | 確認対象のメールアドレス |
 | token | 確認トークン | string | false | - | ユニーク制約あり |
-| token_expires_at | トークン有効期限 | datetime | false | - | - |
+| token_expired_at | トークン有効期限 | datetime | false | - | - |
 | verified_at | 確認日時 | datetime | true | - | 確認完了時に設定 |
 | created_at | 作成日時 | datetime | false | - | - |
 | updated_at | 更新日時 | datetime | false | - | - |

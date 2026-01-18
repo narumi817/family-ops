@@ -22,6 +22,9 @@ Rails.application.routes.draw do
       namespace :family do
         resources :logs, only: [:index]
       end
+
+      # サインアップ
+      post "signup/email", to: "signup#email"
     end
   end
 

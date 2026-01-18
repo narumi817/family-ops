@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_05_142225) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_18_133431) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "email_verifications", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "email", null: false
+    t.string "token", null: false
+    t.datetime "token_expired_at", null: false
+    t.datetime "verified_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_email_verifications_on_email"
+    t.index ["token"], name: "index_email_verifications_on_token", unique: true
+    t.index ["user_id"], name: "index_email_verifications_on_user_id"
+  end
 
   create_table "families", force: :cascade do |t|
     t.string "name", null: false
@@ -75,10 +88,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_05_142225) do
     t.datetime "last_login_at"
     t.string "provider"
     t.string "uid"
+    t.datetime "email_verified_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true, where: "(provider IS NOT NULL)"
   end
 
+  add_foreign_key "email_verifications", "users", on_delete: :cascade
   add_foreign_key "family_members", "families", on_delete: :cascade
   add_foreign_key "family_members", "users", on_delete: :cascade
   add_foreign_key "family_task_points", "families", on_delete: :cascade
