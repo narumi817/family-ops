@@ -25,6 +25,7 @@ Rails.application.routes.draw do
 
       # サインアップ
       post "signup/email", to: "signup#email"
+      get  "signup/verify", to: "signup#verify"
     end
   end
 

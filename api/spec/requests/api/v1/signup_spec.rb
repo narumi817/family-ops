@@ -92,5 +92,56 @@ RSpec.describe "Api::V1::Signup", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/signup/verify" do
+    context "正常系" do
+      it "有効なトークンでメールアドレスを検証できる" do
+        verification = EmailVerification.generate_token(email: "verify@example.com", user: nil)
+
+        get "/api/v1/signup/verify", params: { token: verification.token }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["email"]).to eq("verify@example.com")
+        expect(json_response["verified"]).to be true
+        expect(verification.reload.verified_at).to be_present
+      end
+    end
+
+    context "異常系" do
+      it "トークンが指定されていない場合、400を返す" do
+        get "/api/v1/signup/verify"
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("トークンが指定されていません")
+      end
+
+      it "存在しないトークンの場合、400を返す" do
+        get "/api/v1/signup/verify", params: { token: "invalid-token" }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "有効期限切れのトークンの場合、400を返す" do
+        verification = EmailVerification.generate_token(email: "expired@example.com", user: nil)
+        verification.update!(token_expired_at: 1.hour.ago)
+
+        get "/api/v1/signup/verify", params: { token: verification.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "既に検証済みのトークンの場合、400を返す" do
+        verification = EmailVerification.generate_token(email: "used@example.com", user: nil)
+        verification.update!(verified_at: Time.current)
+
+        get "/api/v1/signup/verify", params: { token: verification.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+    end
+  end
 end
 

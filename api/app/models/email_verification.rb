@@ -55,6 +55,17 @@ class EmailVerification < ApplicationRecord
       verification
     end
 
+    # トークンを検証し、確認済みに更新する
+    # @param token [String] 確認トークン
+    # @return [EmailVerification, nil] 検証に成功した確認レコード、失敗した場合はnil
+    def update_verified(token)
+      verification = verify_token(token)
+      return nil unless verification
+
+      verification.update!(verified_at: Time.current) if verification.verified_at.nil?
+      verification
+    end
+
     # メールアドレスに対する確認トークンを取得または生成する
     # 既存の未確認トークンがあればそれを返し、なければ新規作成する
     # @param email [String] メールアドレス
