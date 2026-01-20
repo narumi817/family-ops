@@ -51,6 +51,48 @@ module Api
           verified: true
         }, status: :ok
       end
+
+      # メールアドレス確認完了後にユーザー・家族を作成する
+      # POST /api/v1/signup/complete
+      # @param email [String] メールアドレス（必須、確認済みであること）
+      # @param name [String] ユーザー名（必須）
+      # @param password [String] パスワード（必須）
+      # @param password_confirmation [String] パスワード（確認用、必須）
+      # @param family_name [String] 家族名（必須）
+      # @param role [String] 家族内での役割（optional, default: "other"）
+      # @return [JSON] 作成されたユーザー・家族情報
+      def complete
+        result = SignupService.complete(
+          email: params[:email],
+          name: params[:name],
+          password: params[:password],
+          password_confirmation: params[:password_confirmation],
+          family_name: params[:family_name],
+          role: params[:role]
+        )
+
+        unless result[:success]
+          payload = result[:errors] ? { errors: result[:errors] } : { error: result[:error] }
+          return render json: payload, status: result[:status]
+        end
+
+        user = result[:user]
+        family = result[:family]
+
+        session[:user_id] = user.id
+
+        render json: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email
+          },
+          family: {
+            id: family.id,
+            name: family.name
+          }
+        }, status: :ok
+      end
     end
   end
 end

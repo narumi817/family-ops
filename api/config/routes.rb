@@ -24,8 +24,11 @@ Rails.application.routes.draw do
       end
 
       # サインアップ
-      post "signup/email", to: "signup#email"
-      get  "signup/verify", to: "signup#verify"
+      scope :signup, controller: :signup do
+        post :email
+        get  :verify
+        post :complete
+      end
     end
   end
 

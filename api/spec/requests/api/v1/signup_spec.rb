@@ -143,5 +143,127 @@ RSpec.describe "Api::V1::Signup", type: :request do
       end
     end
   end
+
+  describe "POST /api/v1/signup/complete" do
+    let(:email) { "signup-complete@example.com" }
+
+    context "正常系" do
+      it "確認済みメールアドレスでユーザーと家族を作成し、ログイン状態にする" do
+        # 確認済みメールアドレスを用意
+        verification = EmailVerification.generate_token(email: email, user: nil)
+        verification.update!(verified_at: Time.current)
+
+        expect {
+          post "/api/v1/signup/complete", params: {
+            email: email,
+            name: "サインアップユーザー",
+            password: "password123",
+            password_confirmation: "password123",
+            family_name: "サインアップ家族",
+            role: "mother"
+          }
+        }.to change(User, :count).by(1)
+          .and change(Family, :count).by(1)
+          .and change(FamilyMember, :count).by(1)
+
+        expect(response).to have_http_status(:ok)
+
+        json = json_response
+        user = User.last
+        family = Family.last
+
+        expect(json["user"]["id"]).to eq(user.id)
+        expect(json["user"]["name"]).to eq("サインアップユーザー")
+        expect(json["user"]["email"]).to eq(email)
+
+        expect(json["family"]["id"]).to eq(family.id)
+        expect(json["family"]["name"]).to eq("サインアップ家族")
+
+        expect(user.email_verified_at).to be_present
+        expect(session[:user_id]).to eq(user.id)
+        expect(EmailVerification.by_email(email)).to be_empty
+      end
+    end
+
+    context "異常系" do
+      it "必須パラメータが不足している場合、400を返す" do
+        post "/api/v1/signup/complete", params: {
+          email: "",
+          name: "",
+          password: "",
+          password_confirmation: "",
+          family_name: ""
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]).to be_present
+        expect(json_response["errors"]["email"]).to include("を入力してください")
+        expect(json_response["errors"]["name"]).to include("を入力してください")
+        expect(json_response["errors"]["password"]).to include("を入力してください")
+        expect(json_response["errors"]["password_confirmation"]).to include("を入力してください")
+        expect(json_response["errors"]["family_name"]).to include("を入力してください")
+      end
+
+      it "メールアドレスが不正な形式の場合、400を返す" do
+        post "/api/v1/signup/complete", params: {
+          email: "invalid-email",
+          name: "ユーザー",
+          password: "password123",
+          password_confirmation: "password123",
+          family_name: "家族名"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]).to be_present
+        expect(json_response["errors"]["email"]).to include("は有効な形式ではありません")
+      end
+
+      it "パスワードと確認用パスワードが一致しない場合、400を返す" do
+        post "/api/v1/signup/complete", params: {
+          email: email,
+          name: "ユーザー",
+          password: "password123",
+          password_confirmation: "different",
+          family_name: "家族名"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]).to be_present
+        expect(json_response["errors"]["password_confirmation"]).to include("とパスワードが一致しません")
+      end
+
+      it "既にユーザーが存在するメールアドレスの場合、400を返す" do
+        create(:user, email: email)
+
+        post "/api/v1/signup/complete", params: {
+          email: email,
+          name: "ユーザー",
+          password: "password123",
+          password_confirmation: "password123",
+          family_name: "家族名"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]).to be_present
+        expect(json_response["errors"]["email"]).to include("は既に使用されています")
+      end
+
+      it "メールアドレスが確認済みでない場合、400を返す" do
+        # EmailVerification はあるが verified_at がNULL
+        EmailVerification.generate_token(email: email, user: nil)
+
+        post "/api/v1/signup/complete", params: {
+          email: email,
+          name: "ユーザー",
+          password: "password123",
+          password_confirmation: "password123",
+          family_name: "家族名"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("メールアドレスが確認されていません")
+      end
+    end
+  end
 end
 
