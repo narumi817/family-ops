@@ -19,6 +19,10 @@ Rails.application.routes.draw do
       resources :logs, only: [:create]
 
       # 家族関連
+      resources :families, only: [] do
+        post :invitations, to: "families/invitations#create"
+      end
+
       namespace :family do
         resources :logs, only: [:index]
       end

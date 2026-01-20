@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_18_133431) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_20_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,6 +31,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_18_133431) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "family_invitations", force: :cascade do |t|
+    t.bigint "family_id", null: false
+    t.string "email", null: false
+    t.string "token", null: false
+    t.datetime "token_expired_at", null: false
+    t.bigint "invite_user_id", null: false
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_family_invitations_on_email"
+    t.index ["family_id"], name: "index_family_invitations_on_family_id"
+    t.index ["token"], name: "index_family_invitations_on_token", unique: true
   end
 
   create_table "family_members", force: :cascade do |t|
@@ -94,6 +108,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_18_133431) do
   end
 
   add_foreign_key "email_verifications", "users", on_delete: :cascade
+  add_foreign_key "family_invitations", "families", on_delete: :cascade
+  add_foreign_key "family_invitations", "users", column: "invite_user_id", on_delete: :cascade
   add_foreign_key "family_members", "families", on_delete: :cascade
   add_foreign_key "family_members", "users", on_delete: :cascade
   add_foreign_key "family_task_points", "families", on_delete: :cascade

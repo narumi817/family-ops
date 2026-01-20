@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :logs, dependent: :restrict_with_error
   has_many :family_members, dependent: :destroy
   has_many :families, through: :family_members
+  has_many :family_invitations, foreign_key: :invite_user_id, dependent: :destroy
 
   # バリデーション
   validates :name, presence: true

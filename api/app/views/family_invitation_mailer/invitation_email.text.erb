@@ -1,0 +1,20 @@
+FamilyOpsをご利用中のご家族 <%= @inviter_name %> さんから、家族メンバーとして招待されています。
+
+家族「<%= @family_name %>」に参加するには、以下のリンクをクリックしてください。
+
+<%
+  url_options = Rails.application.config.action_mailer.default_url_options
+  base_url = url_options[:port] ? "#{url_options[:host]}:#{url_options[:port]}" : url_options[:host]
+%>
+<%= "#{base_url}/api/v1/invitations/verify?token=#{@token}" %>
+
+※ このリンクは24時間有効です。
+
+もしこのメールに心当たりがない場合は、メールを破棄してください。
+
+---
+
+FamilyOps
+家族の毎日を、もっと楽しく
+
+
