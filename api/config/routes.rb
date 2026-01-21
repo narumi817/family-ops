@@ -27,8 +27,11 @@ Rails.application.routes.draw do
         resources :logs, only: [:index]
       end
 
-      # 招待トークン検証
-      get "invitations/verify", to: "invitations#verify"
+      # 招待
+      scope :invitations, controller: :invitations do
+        get  :verify
+        post :complete
+      end
 
       # サインアップ
       scope :signup, controller: :signup do

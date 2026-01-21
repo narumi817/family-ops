@@ -93,6 +93,7 @@
   - [ ] コールバック処理（GET /api/auth/google/callback）
 - [ ] UserモデルのOAuth対応
   - [ ] provider/uidでの検索・作成ロジック
+  - [ ] パスワードサインアップ/招待サインアップ/OAuthサインアップのService共通化・リファクタリング検討（SignupService, InvitationSignupService など）
 
 ## 📝 モデル実装
 

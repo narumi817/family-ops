@@ -67,34 +67,26 @@ class SignupService
     # @param family_name [String] 家族名
     # @return [Hash] バリデーション結果
     def validate_params(email, name, password, password_confirmation, family_name)
-      errors = {}
+      basic_result = SignupValidationService.validate_basic(
+        email: email,
+        name: name,
+        password: password,
+        password_confirmation: password_confirmation,
+        check_email_presence: true
+      )
 
-      # 必須チェック
-      errors[:email] = ["を入力してください"] if email.blank?
-      errors[:name] = ["を入力してください"] if name.blank?
-      errors[:password] = ["を入力してください"] if password.blank?
-      errors[:password_confirmation] = ["を入力してください"] if password_confirmation.blank?
-      errors[:family_name] = ["を入力してください"] if family_name.blank?
-
-      # メールアドレス形式チェック
-      if email.present? && !email.match?(URI::MailTo::EMAIL_REGEXP)
-        errors[:email] ||= []
-        errors[:email] << "は有効な形式ではありません"
+      # family_nameチェック
+      if family_name.blank?
+        errors = basic_result[:errors] ? basic_result[:errors].dup : {}
+        errors[:family_name] = ["を入力してください"]
+        return { success: false, errors: errors, status: :bad_request }
       end
 
-      # パスワード一致チェック
-      if password.present? && password_confirmation.present? && password != password_confirmation
-        errors[:password_confirmation] ||= []
-        errors[:password_confirmation] << "とパスワードが一致しません"
-      end
+      return basic_result unless basic_result[:success]
 
-      # 既存ユーザーチェック
-      if email.present? && User.exists?(email: email)
-        errors[:email] ||= []
-        errors[:email] << "は既に使用されています"
+      if basic_result[:errors]
+        return { success: false, errors: basic_result[:errors], status: :bad_request }
       end
-
-      return { success: false, errors: errors, status: :bad_request } if errors.any?
 
       { success: true }
     end

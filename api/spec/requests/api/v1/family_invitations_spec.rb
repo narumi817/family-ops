@@ -159,6 +159,148 @@ RSpec.describe "Family invitations API", type: :request do
       end
     end
   end
+
+  describe "POST /api/v1/invitations/complete" do
+    let(:family) { create(:family, name: "招待家族") }
+    let(:inviter) { create(:user, name: "招待者", email: "inviter@example.com", password: "password123") }
+    let(:email) { "invitee-complete@example.com" }
+    let(:password) { "password123" }
+
+    context "正常系" do
+      it "有効な招待トークンでユーザーを作成し、家族メンバーとして紐付け、ログイン状態にする" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+
+        expect {
+          post "/api/v1/invitations/complete", params: {
+            token: invitation.token,
+            name: "招待ユーザー",
+            password: password,
+            password_confirmation: password
+          }
+        }.to change(User, :count).by(1)
+         .and change(FamilyMember, :count).by(1)
+
+        expect(response).to have_http_status(:ok)
+
+        json = json_response
+        user = User.by_email(email).first
+
+        expect(json["user"]["id"]).to eq(user.id)
+        expect(json["user"]["name"]).to eq("招待ユーザー")
+        expect(json["user"]["email"]).to eq(email)
+
+        expect(json["family"]["id"]).to eq(family.id)
+        expect(json["family"]["name"]).to eq("招待家族")
+
+        expect(user.email_verified_at).to be_present
+        expect(session[:user_id]).to eq(user.id)
+
+        invitation.reload
+        expect(invitation.accepted_at).to be_present
+      end
+    end
+
+    context "異常系" do
+      it "トークンが指定されていない場合、400を返す" do
+        post "/api/v1/invitations/complete", params: {
+          token: "",
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: password
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("トークンが指定されていません")
+      end
+
+      it "存在しないトークンの場合、400を返す" do
+        post "/api/v1/invitations/complete", params: {
+          token: "non-existent-token",
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: password
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "必須パラメータが不足している場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+
+        post "/api/v1/invitations/complete", params: {
+          token: invitation.token,
+          name: "",
+          password: "",
+          password_confirmation: ""
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]["name"]).to include("を入力してください")
+        expect(json_response["errors"]["password"]).to include("を入力してください")
+        expect(json_response["errors"]["password_confirmation"]).to include("を入力してください")
+      end
+
+      it "パスワードと確認用パスワードが一致しない場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+
+        post "/api/v1/invitations/complete", params: {
+          token: invitation.token,
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: "different"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]["password_confirmation"]).to include("とパスワードが一致しません")
+      end
+
+      it "既に同じメールアドレスのユーザーが存在する場合、400を返す" do
+        create(:user, email: email, password: password)
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+
+        post "/api/v1/invitations/complete", params: {
+          token: invitation.token,
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: password
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]["email"]).to include("は既に使用されています")
+      end
+
+      it "有効期限切れのトークンの場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+        invitation.update!(token_expired_at: 1.hour.ago)
+
+        post "/api/v1/invitations/complete", params: {
+          token: invitation.token,
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: password
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "既に受諾済みのトークンの場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+        invitation.update!(accepted_at: Time.current)
+
+        post "/api/v1/invitations/complete", params: {
+          token: invitation.token,
+          name: "招待ユーザー",
+          password: password,
+          password_confirmation: password
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+    end
+  end
 end
 
 

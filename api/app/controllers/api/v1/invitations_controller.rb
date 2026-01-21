@@ -30,6 +30,44 @@ module Api
           invited: true
         }, status: :ok
       end
+
+      # 招待経由のサインアップ完了
+      # POST /api/v1/invitations/complete
+      # @param token [String] 招待トークン（必須）
+      # @param name [String] ユーザー名（必須）
+      # @param password [String] パスワード（必須）
+      # @param password_confirmation [String] パスワード（確認用、必須）
+      # @return [JSON] 作成されたユーザー・家族情報
+      def complete
+        result = InvitationSignupService.complete(
+          token: params[:token],
+          name: params[:name],
+          password: params[:password],
+          password_confirmation: params[:password_confirmation]
+        )
+
+        unless result[:success]
+          payload = result[:errors] ? { errors: result[:errors] } : { error: result[:error] }
+          return render json: payload, status: result[:status]
+        end
+
+        user = result[:user]
+        family = result[:family]
+
+        session[:user_id] = user.id
+
+        render json: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email
+          },
+          family: {
+            id: family.id,
+            name: family.name
+          }
+        }, status: :ok
+      end
     end
   end
 end
