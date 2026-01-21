@@ -20,6 +20,16 @@ class FamilyInvitation < ApplicationRecord
   end
 
   class << self
+    # 招待トークンを検証する
+    # @param token [String] 招待トークン
+    # @return [FamilyInvitation, nil] 有効な招待レコード、見つからないか無効な場合はnil
+    def verify_token(token)
+      invitation = by_token(token).unaccepted.first
+      return nil unless invitation&.valid_token?
+
+      invitation
+    end
+
     # 招待トークンを生成する
     # @param family [Family] 招待先の家族
     # @param inviter [User] 招待者

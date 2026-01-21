@@ -27,6 +27,9 @@ Rails.application.routes.draw do
         resources :logs, only: [:index]
       end
 
+      # 招待トークン検証
+      get "invitations/verify", to: "invitations#verify"
+
       # サインアップ
       scope :signup, controller: :signup do
         post :email

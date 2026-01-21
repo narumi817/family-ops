@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Api::V1::Families::Invitations", type: :request do
+RSpec.describe "Family invitations API", type: :request do
   before do
     host! "www.example.com"
   end
@@ -97,6 +97,65 @@ RSpec.describe "Api::V1::Families::Invitations", type: :request do
 
         expect(response).to have_http_status(:bad_request)
         expect(json_response["errors"]["email"]).to include("は既に家族メンバーです")
+      end
+    end
+  end
+
+  describe "GET /api/v1/invitations/verify" do
+    let(:family) { create(:family, name: "テスト家族") }
+    let(:inviter) { create(:user, name: "招待者", email: "inviter@example.com", password: "password123") }
+    let(:email) { "invitee@example.com" }
+
+    context "正常系" do
+      it "有効なトークンで招待情報を取得できる" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+
+        get "/api/v1/invitations/verify", params: { token: invitation.token }
+
+        expect(response).to have_http_status(:ok)
+        json = json_response
+        expect(json["email"]).to eq(email)
+        expect(json["family"]["id"]).to eq(family.id)
+        expect(json["family"]["name"]).to eq("テスト家族")
+        expect(json["inviter"]["id"]).to eq(inviter.id)
+        expect(json["inviter"]["name"]).to eq("招待者")
+        expect(json["invited"]).to be true
+      end
+    end
+
+    context "異常系" do
+      it "トークンが指定されていない場合、400を返す" do
+        get "/api/v1/invitations/verify", params: { token: "" }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("トークンが指定されていません")
+      end
+
+      it "存在しないトークンの場合、400を返す" do
+        get "/api/v1/invitations/verify", params: { token: "non-existent-token" }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "有効期限切れのトークンの場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+        invitation.update!(token_expired_at: 1.hour.ago)
+
+        get "/api/v1/invitations/verify", params: { token: invitation.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "既に受諾済みのトークンの場合、400を返す" do
+        invitation = FamilyInvitation.generate_token(family: family, inviter: inviter, email: email)
+        invitation.update!(accepted_at: Time.current)
+
+        get "/api/v1/invitations/verify", params: { token: invitation.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
       end
     end
   end
