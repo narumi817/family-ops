@@ -117,7 +117,7 @@ definePageMeta({
 })
 
 const router = useRouter()
-const { apiFetch } = useApi()
+const { apiFetchAction } = useApi()
 
 const apiError = ref<string | null>(null)
 const loading = ref(false)
@@ -151,7 +151,7 @@ const onSubmit = handleSubmit(async (values) => {
   loading.value = true
 
   try {
-    const { data, error } = await apiFetch<{ message: string }>('/api/v1/signup/email', {
+    const { data, error } = await apiFetchAction<{ message: string }>('/api/v1/signup/email', {
       method: 'POST',
       body: {
         email: values.email.trim(),
@@ -173,6 +173,10 @@ const onSubmit = handleSubmit(async (values) => {
     }
 
     if (data.value) {
+      // メールアドレスをセッションストレージに保存（再送信用）
+      if (process.client) {
+        sessionStorage.setItem('signup_email', values.email.trim())
+      }
       // 成功時は送信完了画面へ遷移
       router.push('/signup/email_sent')
     }

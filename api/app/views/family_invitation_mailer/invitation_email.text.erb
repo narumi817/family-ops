@@ -4,9 +4,10 @@ FamilyOpsをご利用中のご家族 <%= @inviter_name %> さんから、家族�
 
 <%
   url_options = Rails.application.config.action_mailer.default_url_options
+  protocol = url_options[:protocol] || 'http'
   base_url = url_options[:port] ? "#{url_options[:host]}:#{url_options[:port]}" : url_options[:host]
 %>
-<%= "#{base_url}/api/v1/invitations/verify?token=#{@token}" %>
+<%= "#{protocol}://#{base_url}/api/v1/invitations/verify?token=#{@token}" %>
 
 ※ このリンクは24時間有効です。
 
