@@ -6,7 +6,7 @@
         新規登録
       </h2>
 
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form @submit="onSubmit" class="space-y-6">
         <!-- メールアドレス -->
         <div>
           <label
@@ -17,13 +17,13 @@
           </label>
           <input
             id="email"
-            v-model="email"
+            v-model="emailValue"
             type="email"
             placeholder="example@email.com"
             class="w-full px-4 py-4 text-base rounded-lg border transition-all duration-200 outline-none touch-manipulation"
             :class="emailError ? 'border-red-300 focus:ring-2 focus:ring-red-400 focus:border-transparent' : 'border-gray-300 focus:ring-2 focus:ring-orange-400 focus:border-transparent'"
             :disabled="loading"
-            @blur="validateEmail"
+            @blur="emailMeta.touched = true"
           />
           <!-- エラーメッセージ -->
           <p v-if="emailError" class="mt-2 text-sm text-red-600">
@@ -42,7 +42,7 @@
         <!-- 送信ボタン -->
         <button
           type="submit"
-          :disabled="loading || !!emailError"
+          :disabled="loading || !isValid"
           class="w-full min-h-[56px] bg-gradient-to-r from-orange-400 to-pink-400 text-white font-semibold text-base py-4 px-6 rounded-lg shadow-lg active:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 touch-manipulation"
         >
           <span v-if="loading" class="flex items-center justify-center">
@@ -109,6 +109,9 @@
 </template>
 
 <script setup lang="ts">
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
+
 definePageMeta({
   layout: 'auth',
 })
@@ -116,46 +119,42 @@ definePageMeta({
 const router = useRouter()
 const { apiFetch } = useApi()
 
-const email = ref('')
-const emailError = ref<string | null>(null)
 const apiError = ref<string | null>(null)
 const loading = ref(false)
 
-// メールアドレスの簡易バリデーション
-const validateEmail = () => {
-  emailError.value = null
+// Yupスキーマ定義
+const validationSchema = yup.object({
+  email: yup
+    .string()
+    .required('メールアドレスを入力してください')
+    .email('有効なメールアドレスを入力してください'),
+})
 
-  if (!email.value.trim()) {
-    emailError.value = 'メールアドレスを入力してください'
-    return false
-  }
+// フォーム設定
+const { handleSubmit, meta: formMeta } = useForm({
+  validationSchema,
+})
 
-  // 簡易的なメールアドレス形式チェック
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value.trim())) {
-    emailError.value = '有効なメールアドレスを入力してください'
-    return false
-  }
+// メールアドレスフィールド
+const {
+  value: emailValue,
+  errorMessage: emailError,
+  meta: emailMeta,
+} = useField<string>('email')
 
-  return true
-}
+// バリデーション状態
+const isValid = computed(() => formMeta.value.valid)
 
-const handleSubmit = async () => {
-  emailError.value = null
+// フォーム送信処理
+const onSubmit = handleSubmit(async (values) => {
   apiError.value = null
-
-  // 画面側バリデーション
-  if (!validateEmail()) {
-    return
-  }
-
   loading.value = true
 
   try {
     const { data, error } = await apiFetch<{ message: string }>('/api/v1/signup/email', {
       method: 'POST',
       body: {
-        email: email.value.trim(),
+        email: values.email.trim(),
       },
     })
 
@@ -182,6 +181,6 @@ const handleSubmit = async () => {
   } finally {
     loading.value = false
   }
-}
+})
 </script>
 

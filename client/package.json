@@ -13,7 +13,10 @@
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.3",
-    "nuxt": "^4.2.2"
+    "@vee-validate/yup": "^4.15.1",
+    "nuxt": "^4.2.2",
+    "vee-validate": "^4.15.1",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^25.0.3"
