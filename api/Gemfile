@@ -49,6 +49,13 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
+group :development do
+  # Preview emails in the browser instead of sending them
+  gem "letter_opener"
+  # Web interface for viewing emails sent with letter_opener
+  gem "letter_opener_web"
+end
+
 group :test do
   # Testing framework
   gem "rspec-rails", "~> 7.0"
