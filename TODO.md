@@ -68,6 +68,7 @@
   - [x] メールアドレス確認機能
     - [x] トークン生成・検証ロジック
     - [x] メール送信機能（ActionMailer）
+    - [x] 開発環境でのメール確認（letter_opener / letter_opener_web）
   - [x] 画面からのサインアップ（最初の家族メンバー）
     - [x] SignupControllerの作成
     - [x] メールアドレス登録・確認メール送信
@@ -250,7 +251,15 @@
   - [x] モバイルファーストデザイン
   - [x] 片手操作しやすいボタンサイズ
   - [x] 温かみのあるデザイン
-- [ ] サインアップ画面
+- [x] 認証前共通レイアウト（layouts/auth.vue）
+- [x] サインアップ画面（通常フロー）
+  - [x] /signup/email（メールアドレス入力）
+  - [x] /signup/email_sent（確認メール送信完了）
+  - [x] /signup/verify（メール認証）
+  - [x] /signup/complete（ユーザー情報登録）
+- [ ] 招待フロー画面
+  - [ ] /invitations/verify（招待トークン確認）
+  - [ ] /invitations/complete（招待受諾）
 - [ ] Google認証ボタン
 - [x] 認証状態管理（Pinia）
 

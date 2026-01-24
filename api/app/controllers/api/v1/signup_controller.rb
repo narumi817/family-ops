@@ -18,7 +18,7 @@ module Api
 
         # 既にユーザーが登録されているかチェック
         if User.exists?(email: email_param)
-          return render json: { error: "このメールアドレスは使用できません" }, status: :unprocessable_entity
+          return render json: { error: "このメールアドレスは使用できません" }, status: :unprocessable_content
         end
 
         # 確認トークンを取得または生成（既存の未確認トークンがあれば再利用）

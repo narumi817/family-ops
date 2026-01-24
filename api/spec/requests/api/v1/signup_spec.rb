@@ -77,7 +77,7 @@ RSpec.describe "Api::V1::Signup", type: :request do
 
         post "/api/v1/signup/email", params: { email: existing_user.email }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["error"]).to eq("このメールアドレスは使用できません")
       end
 

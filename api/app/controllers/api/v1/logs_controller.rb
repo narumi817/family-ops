@@ -12,7 +12,7 @@ module Api
       def create
         log = current_user.logs.build(log_params)
 
-        return render json: { errors: log.errors.full_messages }, status: :unprocessable_entity unless log.save
+        return render json: { errors: log.errors.full_messages }, status: :unprocessable_content unless log.save
 
         render json: log_response(log), status: :created
       end
