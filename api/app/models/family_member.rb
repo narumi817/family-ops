@@ -1,10 +1,11 @@
 class FamilyMember < ApplicationRecord
   # Enum定義
   enum :role, {
-    other: 0,    # その他（デフォルト）
-    mother: 1,   # 母親
-    father: 2,   # 父親
-    child: 3     # 子
+    unspecified: 0, # 指定なし（デフォルト）
+    mother: 1,      # 母親
+    father: 2,      # 父親
+    child: 3,       # 子
+    other: 4        # その他
   }
 
   # アソシエーション
@@ -31,7 +32,7 @@ class FamilyMember < ApplicationRecord
 
   # 新規レコード作成時にデフォルトの役割を設定する
   def set_default_role
-    self.role ||= :other
+    self.role ||= :unspecified
   end
 end
 

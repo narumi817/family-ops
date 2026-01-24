@@ -6,10 +6,10 @@ class SignupService
     # @param password [String] パスワード
     # @param password_confirmation [String] パスワード（確認用）
     # @param family_name [String] 家族名
-    # @param role [String] 家族内での役割（デフォルト: "other"）
+    # @param role [String] 家族内での役割（デフォルト: "unspecified"）
     # @return [Hash] 成功時は { success: true, user: User, family: Family }、
     #               失敗時は { success: false, errors: Hash, status: Symbol } または { success: false, error: String, status: Symbol }
-    def complete(email:, name:, password:, password_confirmation:, family_name:, role: "other")
+    def complete(email:, name:, password:, password_confirmation:, family_name:, role: "unspecified")
       email = email&.strip
       name = name&.strip
       family_name = family_name&.strip

@@ -59,7 +59,7 @@ module Api
       # @param password [String] パスワード（必須）
       # @param password_confirmation [String] パスワード（確認用、必須）
       # @param family_name [String] 家族名（必須）
-      # @param role [String] 家族内での役割（optional, default: "other"）
+      # @param role [String] 家族内での役割（optional, default: "unspecified"）
       # @return [JSON] 作成されたユーザー・家族情報
       def complete
         result = SignupService.complete(

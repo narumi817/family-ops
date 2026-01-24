@@ -7,7 +7,7 @@ FamilyOpsへようこそ！
   protocol = url_options[:protocol] || 'http'
   base_url = url_options[:port] ? "#{url_options[:host]}:#{url_options[:port]}" : url_options[:host]
 %>
-<%= "#{protocol}://#{base_url}/api/v1/signup/verify?token=#{@token}" %>
+<%= "#{protocol}://#{base_url}/signup/verify?token=#{@token}" %>
 
 ※ このリンクは24時間有効です。
 

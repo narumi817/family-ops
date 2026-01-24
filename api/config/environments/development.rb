@@ -39,7 +39,8 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :letter_opener
 
   # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Note: メール内リンクはフロント（Nuxt）へ遷移させるため、Nuxtのポートに合わせる
+  config.action_mailer.default_url_options = { host: "localhost", port: 3001, protocol: "http" }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
