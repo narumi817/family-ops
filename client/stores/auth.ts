@@ -74,12 +74,13 @@ export const useAuthStore = defineStore('auth', {
 
     async checkLoginStatus() {
       try {
-        const { apiFetch } = useApi()
-        const { data } = await apiFetch<{
+        const { apiFetchAction } = useApi()
+        const { data } = await apiFetchAction<{
           user: User
           logged_in: boolean
-        }>('/api/v1/logged_in')
-
+        }>('/api/v1/logged_in', {
+          method: 'GET',
+        })
         if (data.value?.logged_in && data.value?.user) {
           this.user = data.value.user
           this.loggedIn = true
