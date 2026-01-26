@@ -37,12 +37,19 @@ module Api
       # ユーザー情報をJSONで返す
       # @param user [User] ユーザーオブジェクト
       def render_user_info(user)
+        family = user.family
+        family_data = family ? {
+          id: family.id,
+          name: family.name
+        } : nil
+
         render json: {
           user: {
             id: user.id,
             name: user.name,
             email: user.email
           },
+          family: family_data,
           logged_in: true
         }, status: :ok
       end

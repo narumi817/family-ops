@@ -17,7 +17,8 @@ class FamilyMember < ApplicationRecord
 
   # バリデーション
   # Enumが自動的にバリデーションを提供するため、明示的なバリデーションは不要
-  validates :user_id, uniqueness: { scope: :family_id, message: "は既にこの家族のメンバーです" }
+  # 1ユーザーは1家族にしか所属できない（user_idのユニーク制約）
+  validates :user_id, uniqueness: { message: "は既に他の家族に所属しています" }
 
   # スコープ
   # @param role [Symbol, Integer] 役割（:mother, :father, :child, :other または 1, 2, 3, 0）

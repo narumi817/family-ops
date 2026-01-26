@@ -5,7 +5,9 @@ class User < ApplicationRecord
   # アソシエーション
   has_many :logs, dependent: :restrict_with_error
   has_many :family_members, dependent: :destroy
+  has_one :family_member, dependent: :destroy
   has_many :families, through: :family_members
+  has_one :family, through: :family_member
   has_many :family_invitations, foreign_key: :invite_user_id, dependent: :destroy
 
   # バリデーション

@@ -192,6 +192,7 @@ definePageMeta({
 type ApiFieldErrors = Record<string, string[]>
 
 const router = useRouter()
+const authStore = useAuthStore()
 const { apiFetchAction } = useApi()
 
 const email = ref<string>('')
@@ -304,6 +305,11 @@ const onSubmit = handleSubmit(async (values) => {
     }
 
     if (data.value) {
+      // 登録成功後、ユーザー情報と家族情報をストアに保存
+      authStore.user = data.value.user
+      authStore.family = data.value.family || null
+      authStore.loggedIn = true
+
       // 登録完了後は不要なのでクリア（再送の導線では必要になるので、残す方針なら消さない）
       sessionStorage.removeItem('signup_email')
       router.push('/')

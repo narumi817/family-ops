@@ -6,8 +6,14 @@ interface User {
   email: string
 }
 
+interface Family {
+  id: number
+  name: string
+}
+
 interface AuthState {
   user: User | null
+  family: Family | null
   loggedIn: boolean
   loading: boolean
 }
@@ -15,6 +21,7 @@ interface AuthState {
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
+    family: null,
     loggedIn: false,
     loading: false,
   }),
@@ -26,6 +33,7 @@ export const useAuthStore = defineStore('auth', {
         const { apiFetch } = useApi()
         const { data, error } = await apiFetch<{
           user: User
+          family: Family | null
           logged_in: boolean
         }>('/api/v1/login', {
           method: 'POST',
@@ -41,6 +49,7 @@ export const useAuthStore = defineStore('auth', {
 
         if (data.value?.logged_in && data.value?.user) {
           this.user = data.value.user
+          this.family = data.value.family || null
           this.loggedIn = true
           return { success: true }
         }
@@ -67,6 +76,7 @@ export const useAuthStore = defineStore('auth', {
         console.error('Logout error:', error)
       } finally {
         this.user = null
+        this.family = null
         this.loggedIn = false
         this.loading = false
       }
@@ -77,15 +87,18 @@ export const useAuthStore = defineStore('auth', {
         const { apiFetchAction } = useApi()
         const { data } = await apiFetchAction<{
           user: User
+          family: Family | null
           logged_in: boolean
         }>('/api/v1/logged_in', {
           method: 'GET',
         })
         if (data.value?.logged_in && data.value?.user) {
           this.user = data.value.user
+          this.family = data.value.family || null
           this.loggedIn = true
         } else {
           this.user = null
+          this.family = null
           this.loggedIn = false
         }
       } catch (error) {
