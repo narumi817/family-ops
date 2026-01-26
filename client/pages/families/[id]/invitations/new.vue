@@ -1,13 +1,73 @@
 <template>
   <div>
-    <!-- ページタイトル -->
-    <div class="mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">家族メンバーを招待</h1>
-      <p class="text-sm sm:text-base text-gray-600">招待したい家族メンバーのメールアドレスを入力してください</p>
+    <!-- ローディング状態 -->
+    <div v-if="checkingAuth" class="flex items-center justify-center min-h-[400px]">
+      <div class="text-center">
+        <svg
+          class="animate-spin h-8 w-8 text-orange-500 mx-auto mb-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          />
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+        <p class="text-gray-600">読み込み中...</p>
+      </div>
     </div>
 
-    <!-- フォーム -->
-    <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-orange-100">
+    <!-- エラー画面 -->
+    <div v-else-if="accessError" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-red-100">
+      <div class="text-center">
+        <div class="mb-4">
+          <svg
+            class="w-16 h-16 text-red-500 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">アクセス権限がありません</h2>
+        <p class="text-sm sm:text-base text-gray-600 mb-6">
+          この家族の招待画面にアクセスする権限がありません。
+        </p>
+        <button
+          @click="router.push('/')"
+          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          ホームに戻る
+        </button>
+      </div>
+    </div>
+
+    <!-- 通常のフォーム -->
+    <div v-else>
+      <!-- ページタイトル -->
+      <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">家族メンバーを招待</h1>
+        <p class="text-sm sm:text-base text-gray-600">招待したい家族メンバーのメールアドレスを入力してください</p>
+      </div>
+
+      <!-- フォーム -->
+      <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-orange-100">
       <form @submit="onSubmit" class="space-y-6">
         <!-- メールアドレス -->
         <div>
@@ -81,12 +141,13 @@
           <span v-else>招待メールを送信</span>
         </button>
       </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useForm } from 'vee-validate'
+import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 
 definePageMeta({
@@ -96,8 +157,40 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const { apiFetchAction } = useApi()
+const authStore = useAuthStore()
 
 const familyId = computed(() => route.params.id as string)
+const checkingAuth = ref(true)
+const accessError = ref(false)
+
+// 認証状態と家族IDの確認
+onMounted(async () => {
+  // 認証状態を確認
+  await authStore.checkLoginStatus()
+
+  // ログインしていない場合はログイン画面へ
+  if (!authStore.loggedIn) {
+    router.push('/login')
+    return
+  }
+
+  // 家族に所属していない場合はエラー
+  if (!authStore.family) {
+    accessError.value = true
+    checkingAuth.value = false
+    return
+  }
+
+  // URLパラメータの家族IDと認証状態の家族IDを比較
+  const urlFamilyId = parseInt(familyId.value, 10)
+  const userFamilyId = authStore.family.id
+
+  if (urlFamilyId !== userFamilyId) {
+    accessError.value = true
+  }
+
+  checkingAuth.value = false
+})
 
 // バリデーションスキーマ
 const validationSchema = yup.object({
@@ -107,30 +200,19 @@ const validationSchema = yup.object({
     .email('有効なメールアドレスを入力してください'),
 })
 
-const { handleSubmit, values, errors: validationErrors, meta: emailMeta } = useForm({
+// フォーム設定
+const { handleSubmit, meta: formMeta, resetForm } = useForm({
   validationSchema,
-  initialValues: {
-    email: '',
-  },
 })
 
-const emailValue = computed({
-  get: () => values.email,
-  set: (value: string) => {
-    values.email = value
-  },
-})
+// メールアドレスフィールド
+const {
+  value: emailValue,
+  errorMessage: emailError,
+  meta: emailMeta,
+} = useField<string>('email')
 
-const emailError = computed(() => {
-  if (emailMeta.value.touched && validationErrors.value.email) {
-    return validationErrors.value.email
-  }
-  return null
-})
-
-const isValid = computed(() => {
-  return !validationErrors.value.email && values.email.trim() !== ''
-})
+const isValid = computed(() => formMeta.value.valid)
 
 const loading = ref(false)
 const apiError = ref<string | null>(null)
@@ -171,8 +253,7 @@ const onSubmit = handleSubmit(async (formValues) => {
     if (data.value) {
       successMessage.value = data.value.message || '招待メールを送信しました'
       // フォームをリセット
-      values.email = ''
-      emailMeta.value.touched = false
+      resetForm()
     }
   } catch (err: any) {
     apiError.value = err.message || '招待メールの送信に失敗しました'
