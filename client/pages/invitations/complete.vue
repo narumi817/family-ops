@@ -2,8 +2,21 @@
   <div>
     <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-orange-100">
       <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 text-center">
-        登録を完了する
+        招待を受けて登録を完了する
       </h2>
+
+      <!-- 招待情報（家族名・招待者） -->
+      <div class="mb-6 space-y-2 text-sm text-gray-700">
+        <p v-if="familyName">
+          家族：
+          <span class="font-semibold">「{{ familyName }}」</span>
+        </p>
+        <p v-if="inviterName">
+          招待者：
+          <span class="font-semibold">{{ inviterName }}</span>
+          さんからの招待です
+        </p>
+      </div>
 
       <!-- メールアドレス（表示のみ） -->
       <div class="mb-6">
@@ -16,7 +29,7 @@
           {{ email || "（未設定）" }}
         </div>
         <p v-if="!email" class="mt-2 text-sm text-red-600">
-          メールアドレスが取得できませんでした。メール送信画面からやり直してください。
+          メールアドレスが取得できませんでした。招待メールのリンクからアクセスし直してください。
         </p>
       </div>
 
@@ -25,7 +38,7 @@
         <UserNameField
           v-model="nameValue"
           :error="nameErrorToShow || undefined"
-          :disabled="loading || !email"
+          :disabled="loading || !email || !token"
           :on-input-clear-error="() => clearApiFieldError('name')"
           :on-blur-touch="() => { nameMeta.touched = true }"
         />
@@ -40,52 +53,28 @@
           :password-confirmation-error="passwordConfirmationErrorToShow || undefined"
           :password-confirmation-on-input-clear-error="() => clearApiFieldError('password_confirmation')"
           :password-confirmation-on-blur-touch="() => { passwordConfirmationMeta.touched = true }"
-          :disabled="loading || !email"
+          :disabled="loading || !email || !token"
           @update:password="(value) => (passwordValue = value)"
           @update:passwordConfirmation="(value) => (passwordConfirmationValue = value)"
         />
-
-        <!-- 家族名 -->
-        <div>
-          <label for="family_name" class="block text-sm font-medium text-gray-700 mb-2">
-            家族名
-          </label>
-          <input
-            id="family_name"
-            v-model="familyNameValue"
-            type="text"
-            placeholder="例）田中家"
-            class="w-full px-4 py-4 text-base rounded-lg border transition-all duration-200 outline-none touch-manipulation"
-            :class="familyNameErrorToShow ? 'border-red-300 focus:ring-2 focus:ring-red-400 focus:border-transparent' : 'border-gray-300 focus:ring-2 focus:ring-orange-400 focus:border-transparent'"
-            :disabled="loading || !email"
-            @input="clearApiFieldError('family_name')"
-            @blur="familyNameMeta.touched = true"
-          />
-          <p v-if="familyNameErrorToShow" class="mt-2 text-sm text-red-600">
-            {{ familyNameErrorToShow }}
-          </p>
-        </div>
 
         <!-- 役割 -->
         <FamilyRoleSelect
           v-model="roleValue"
           :error="roleErrorToShow || undefined"
-          :disabled="loading || !email"
+          :disabled="loading || !email || !token"
           :on-change-clear-error="() => clearApiFieldError('role')"
         />
 
         <!-- エラーメッセージ（API側の汎用エラー） -->
-        <div
-          v-if="apiError"
-          class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-        >
+        <ErrorAlert v-if="apiError">
           {{ apiError }}
-        </div>
+        </ErrorAlert>
 
         <!-- 登録ボタン -->
         <button
           type="submit"
-          :disabled="loading || !email || !isValid"
+          :disabled="loading || !email || !token || !isValid"
           class="w-full min-h-[56px] bg-gradient-to-r from-orange-400 to-pink-400 text-white font-semibold text-base py-4 px-6 rounded-lg shadow-lg active:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 touch-manipulation"
         >
           <span v-if="loading" class="flex items-center justify-center">
@@ -111,13 +100,13 @@
             </svg>
             登録中...
           </span>
-          <span v-else>登録を完了</span>
+          <span v-else>招待を受けて登録を完了</span>
         </button>
       </form>
 
       <div class="mt-6 text-center">
-        <NuxtLink to="/signup/email" class="text-sm text-orange-600 hover:underline">
-          メール送信画面に戻る
+        <NuxtLink to="/login" class="text-sm text-orange-600 hover:underline">
+          ログイン画面に戻る
         </NuxtLink>
       </div>
     </div>
@@ -127,6 +116,7 @@
 <script setup lang="ts">
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
+import ErrorAlert from '@/components/atoms/feedback/ErrorAlert.vue'
 import UserNameField from '@/components/molecules/forms/UserNameField.vue'
 import PasswordFields from '@/components/molecules/forms/PasswordFields.vue'
 import FamilyRoleSelect from '@/components/molecules/forms/FamilyRoleSelect.vue'
@@ -142,14 +132,21 @@ const authStore = useAuthStore()
 const { apiFetchAction } = useApi()
 
 const email = ref<string>('')
+const token = ref<string>('')
+const familyName = ref<string>('')
+const inviterName = ref<string>('')
+
 const loading = ref(false)
 const apiError = ref<string | null>(null)
 const apiFieldErrors = ref<ApiFieldErrors>({})
 
 onMounted(() => {
-  // verify画面で保存される想定（現状は email送信時にも保存している）
-  const stored = sessionStorage.getItem('signup_email')
-  email.value = stored || ''
+  if (process.client) {
+    email.value = sessionStorage.getItem('invitation_email') || ''
+    token.value = sessionStorage.getItem('invitation_token') || ''
+    familyName.value = sessionStorage.getItem('invitation_family_name') || ''
+    inviterName.value = sessionStorage.getItem('invitation_inviter_name') || ''
+  }
 })
 
 const validationSchema = yup.object({
@@ -162,7 +159,6 @@ const validationSchema = yup.object({
     .string()
     .required('パスワード（確認用）を入力してください')
     .oneOf([yup.ref('password')], 'パスワード（確認用）とパスワードが一致しません'),
-  family_name: yup.string().required('家族名を入力してください'),
   role: yup.string().oneOf(['unspecified', 'mother', 'father', 'child', 'other']).default('unspecified'),
 })
 
@@ -181,11 +177,6 @@ const {
   errorMessage: passwordConfirmationError,
   meta: passwordConfirmationMeta,
 } = useField<string>('password_confirmation')
-const {
-  value: familyNameValue,
-  errorMessage: familyNameError,
-  meta: familyNameMeta,
-} = useField<string>('family_name')
 const { value: roleValue, errorMessage: roleError } = useField<string>('role')
 
 const isValid = computed(() => formMeta.value.valid)
@@ -206,17 +197,15 @@ const passwordConfirmationErrorToShow = computed(
   () =>
     apiFieldErrors.value.password_confirmation?.[0] || passwordConfirmationError.value || null,
 )
-const familyNameErrorToShow = computed(
-  () => apiFieldErrors.value.family_name?.[0] || familyNameError.value || null,
-)
 const roleErrorToShow = computed(() => apiFieldErrors.value.role?.[0] || roleError.value || null)
 
 const onSubmit = handleSubmit(async (values) => {
   apiError.value = null
   apiFieldErrors.value = {}
 
-  if (!email.value) {
-    apiError.value = 'メールアドレスが取得できませんでした。メール送信画面からやり直してください。'
+  if (!email.value || !token.value) {
+    apiError.value =
+      '招待情報が取得できませんでした。招待メールのリンクからアクセスし直してください。'
     return
   }
 
@@ -226,14 +215,13 @@ const onSubmit = handleSubmit(async (values) => {
     const { data, error } = await apiFetchAction<{
       user: { id: number; name: string; email: string }
       family: { id: number; name: string }
-    }>('/api/v1/signup/complete', {
+    }>('/api/v1/invitations/complete', {
       method: 'POST',
       body: {
-        email: email.value,
+        token: token.value,
         name: values.name?.trim(),
         password: values.password,
         password_confirmation: values.password_confirmation,
-        family_name: values.family_name?.trim(),
         role: values.role || 'unspecified',
       },
     })
@@ -256,8 +244,14 @@ const onSubmit = handleSubmit(async (values) => {
       authStore.family = data.value.family || null
       authStore.loggedIn = true
 
-      // 登録完了後は不要なのでクリア（再送の導線では必要になるので、残す方針なら消さない）
-      sessionStorage.removeItem('signup_email')
+      // 招待関連の一時情報は不要なのでクリア
+      if (process.client) {
+        sessionStorage.removeItem('invitation_token')
+        sessionStorage.removeItem('invitation_email')
+        sessionStorage.removeItem('invitation_family_name')
+        sessionStorage.removeItem('invitation_inviter_name')
+      }
+
       router.push('/')
     }
   } catch (err: any) {

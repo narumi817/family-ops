@@ -12,6 +12,9 @@ Rails.application.routes.draw do
       delete "logout", to: "sessions#destroy"
       get "logged_in", to: "sessions#logged_in"
 
+      # マスタデータ
+      get "master_data", to: "master_data#show"
+
       # ランダムな労いメッセージを返す
       resource :greeting, only: [:show], controller: 'greeting'
 
