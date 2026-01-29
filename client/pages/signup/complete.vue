@@ -126,10 +126,11 @@
 
 <script setup lang="ts">
 import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
 import UserNameField from '@/components/molecules/forms/UserNameField.vue'
 import PasswordFields from '@/components/molecules/forms/PasswordFields.vue'
 import FamilyRoleSelect from '@/components/molecules/forms/FamilyRoleSelect.vue'
+import { useSignupValidationSchema, useFieldError } from '@/composables/useSignupValidation'
+import { useMasterDataStore } from '@/stores/masterData'
 
 definePageMeta({
   layout: 'auth',
@@ -140,38 +141,43 @@ type ApiFieldErrors = Record<string, string[]>
 const router = useRouter()
 const authStore = useAuthStore()
 const { apiFetchAction } = useApi()
+const masterDataStore = useMasterDataStore()
 
 const email = ref<string>('')
 const loading = ref(false)
 const apiError = ref<string | null>(null)
 const apiFieldErrors = ref<ApiFieldErrors>({})
 
-onMounted(() => {
+onMounted(async () => {
   // verify画面で保存される想定（現状は email送信時にも保存している）
   const stored = sessionStorage.getItem('signup_email')
   email.value = stored || ''
+
+  // マスターデータを取得（まだ取得していない場合）
+  if (!masterDataStore.loaded && !masterDataStore.loading) {
+    await masterDataStore.fetchMasterData()
+  }
 })
 
-const validationSchema = yup.object({
-  name: yup.string().required('ユーザー名を入力してください'),
-  password: yup
-    .string()
-    .required('パスワードを入力してください')
-    .min(6, 'パスワードは6文字以上で入力してください'),
-  password_confirmation: yup
-    .string()
-    .required('パスワード（確認用）を入力してください')
-    .oneOf([yup.ref('password')], 'パスワード（確認用）とパスワードが一致しません'),
-  family_name: yup.string().required('家族名を入力してください'),
-  role: yup.string().oneOf(['unspecified', 'mother', 'father', 'child', 'other']).default('unspecified'),
+// バリデーションスキーマ（マスターAPIから取得した値を使用）
+const { validationSchema, initialValues } = useSignupValidationSchema({
+  includeFamilyName: true,
 })
 
-const { handleSubmit, meta: formMeta } = useForm({
-  validationSchema,
-  initialValues: {
-    role: 'unspecified',
-  },
+// useForm の初期化（validationSchema が computed なので watch で更新）
+const form = useForm({
+  validationSchema: validationSchema.value,
+  initialValues: initialValues.value,
+  validateOnMount: false, // 初期表示時はバリデーションを実行しない
 })
+
+// マスターデータが取得できたらバリデーションスキーマを更新
+watch(validationSchema, (newSchema) => {
+  form.setValues(initialValues.value)
+  // スキーマの更新は useForm の内部で行われるため、明示的な更新は不要
+}, { immediate: true })
+
+const { handleSubmit, meta: formMeta } = form
 
 const { value: nameValue, errorMessage: nameError, meta: nameMeta } = useField<string>('name')
 const { value: passwordValue, errorMessage: passwordError, meta: passwordMeta } =
@@ -186,7 +192,7 @@ const {
   errorMessage: familyNameError,
   meta: familyNameMeta,
 } = useField<string>('family_name')
-const { value: roleValue, errorMessage: roleError } = useField<string>('role')
+const { value: roleValue, errorMessage: roleError, meta: roleMeta } = useField<string>('role')
 
 const isValid = computed(() => formMeta.value.valid)
 
@@ -197,19 +203,24 @@ const clearApiFieldError = (field: string) => {
   apiFieldErrors.value = next
 }
 
-// APIエラーを最優先で表示（画面側のバリデーションはその次）
-const nameErrorToShow = computed(() => apiFieldErrors.value.name?.[0] || nameError.value || null)
-const passwordErrorToShow = computed(
-  () => apiFieldErrors.value.password?.[0] || passwordError.value || null,
+// エラー表示ロジック
+const nameErrorToShow = useFieldError('name', apiFieldErrors, nameError, nameMeta)
+const passwordErrorToShow = useFieldError('password', apiFieldErrors, passwordError, passwordMeta)
+const passwordConfirmationErrorToShow = useFieldError(
+  'password_confirmation',
+  apiFieldErrors,
+  passwordConfirmationError,
+  passwordConfirmationMeta,
 )
-const passwordConfirmationErrorToShow = computed(
-  () =>
-    apiFieldErrors.value.password_confirmation?.[0] || passwordConfirmationError.value || null,
+const familyNameErrorToShow = useFieldError(
+  'family_name',
+  apiFieldErrors,
+  familyNameError,
+  familyNameMeta,
 )
-const familyNameErrorToShow = computed(
-  () => apiFieldErrors.value.family_name?.[0] || familyNameError.value || null,
-)
-const roleErrorToShow = computed(() => apiFieldErrors.value.role?.[0] || roleError.value || null)
+const roleErrorToShow = useFieldError('role', apiFieldErrors, roleError, roleMeta, {
+  skipTouchedCheck: true,
+})
 
 const onSubmit = handleSubmit(async (values) => {
   apiError.value = null
