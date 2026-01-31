@@ -29,6 +29,7 @@ Rails.application.routes.draw do
 
       namespace :family do
         resources :logs, only: [:index]
+        get "points/today", to: "points#today"
       end
 
       # 招待

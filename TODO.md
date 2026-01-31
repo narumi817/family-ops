@@ -293,7 +293,7 @@
 
 ### Phase 1: 基本機能
 
-- [ ] 家族のタスク一覧取得API実装 (GET /api/v1/families/:id/tasks)
+- [x] 家族のタスク一覧取得API実装 (GET /api/v1/families/:id/tasks)
   - 全家族共通 + 家族固有のタスクを返す
   - 家族固有のポイントも含める
 - [ ] 当日の累計ポイント取得API実装 (GET /api/v1/family/points/today)

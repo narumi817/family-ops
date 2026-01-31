@@ -62,6 +62,20 @@ class Log < ApplicationRecord
 
       logs
     end
+
+    # 指定されたユーザーの当日の累計ポイントを計算する
+    # @param user_id [Integer] ユーザーID
+    # @param family_id [Integer] 家族ID
+    # @param date [Date, nil] 日付（デフォルト: 今日）
+    # @return [Integer] 累計ポイント
+    def today_points_for_user(user_id, family_id, date: nil)
+      date ||= Date.current
+      today_logs = by_user(user_id).by_date(date).includes(:task)
+
+      today_logs.sum do |log|
+        log.task.points_for_family(family_id)
+      end
+    end
   end
 end
 
