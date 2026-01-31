@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       # 家族関連
       resources :families, only: [] do
         post :invitations, to: "families/invitations#create"
+        resources :tasks, only: [:index], controller: "families/tasks"
       end
 
       namespace :family do
