@@ -154,7 +154,6 @@
 - [x] POST /api/v1/login - ログイン
 - [x] DELETE /api/v1/logout - ログアウト
 - [x] GET /api/v1/logged_in - ログイン状態確認
-- [ ] GET /api/v1/me - 現在のユーザー情報取得（logged_inで代替可能）
 - [ ] GET /api/v1/auth/google - Google認証開始
 - [ ] GET /api/v1/auth/google/callback - Google認証コールバック
 
@@ -296,14 +295,14 @@
 - [x] 家族のタスク一覧取得API実装 (GET /api/v1/families/:id/tasks)
   - 全家族共通 + 家族固有のタスクを返す
   - 家族固有のポイントも含める
-- [ ] 当日の累計ポイント取得API実装 (GET /api/v1/family/points/today)
+- [x] 当日の累計ポイント取得API実装 (GET /api/v1/family/points/today)
   - ログイン中のユーザーの当日の累計ポイントを取得
-- [ ] ログ一覧画面の拡張 (/index.vue)
+- [x] ログ一覧画面の拡張 (/index.vue)
   - 当日のログをタイムライン表示
   - 当日の累計ポイント表示
   - 実行者の色分け
   - メモ表示
-- [ ] タスクログ登録画面実装 (/logs/new)
+- [x] タスクログ登録画面実装 (/logs/new)
   - タスク選択
   - 実行時間選択
   - メモ入力
