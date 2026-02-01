@@ -10,8 +10,9 @@ dist
 node_modules
 
 # Logs
-logs
+/logs
 *.log
+!pages/logs/
 
 # Misc
 .DS_Store
