@@ -19,6 +19,36 @@ module Api
           }, status: :ok
         end
 
+        # タスクのポイントを更新する
+        # PUT /api/v1/families/:id/tasks/:task_id/points
+        # PATCH /api/v1/families/:id/tasks/:task_id/points
+        # @param points [Integer] ポイント数（必須）
+        # @return [JSON] 更新されたポイント情報
+        def update_points
+          task = ::Task.find_by(id: params[:id])
+          unless task
+            render json: { error: "タスクが見つかりません" }, status: :not_found
+            return
+          end
+
+          result = FamilyTaskPointService.update_points(@family, task, params[:points])
+
+          unless result[:success]
+            error_message = result[:errors].first || "ポイントの更新に失敗しました"
+            render json: { error: error_message, errors: result[:errors] }, status: :unprocessable_content
+            return
+          end
+
+          family_task_point = result[:family_task_point]
+          render json: {
+            id: family_task_point.id,
+            family_id: family_task_point.family_id,
+            task_id: family_task_point.task_id,
+            points: family_task_point.points,
+            updated_at: family_task_point.updated_at
+          }, status: :ok
+        end
+
         private
 
         # 家族を設定する
