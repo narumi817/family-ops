@@ -310,9 +310,9 @@
 
 ### Phase 2: タスク管理
 
-- [ ] タスクポイント変更API実装 (PUT /api/v1/families/:id/tasks/:task_id/points)
+- [x] タスクポイント変更API実装 (PUT /api/v1/families/:id/tasks/:task_id/points)
   - FamilyTaskPointの作成・更新
-- [ ] タスクマスタ管理画面実装 (/families/[id]/tasks)
+- [x] タスクマスタ管理画面実装 (/families/[id]/tasks)
   - タスク一覧表示（タスク名、カテゴリ、ポイント、説明）
   - ポイント編集UI
 
@@ -326,6 +326,11 @@
 - [ ] ゴール設定とポイント消費機能
   - ゴール設定
   - 累計ポイント・使用できるポイントの別管理
+
+## 🎨 UI/UX改善
+
+- [ ] スマホ表示レイアウト修正（レスポンシブデザインの調整）
+  - タスクマスタ管理画面（/families/[id]/tasks）の改善
 
 ## 🚀 デプロイ準備
 

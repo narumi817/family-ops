@@ -235,11 +235,9 @@ const fetchTasks = async () => {
 
 // 編集モーダルを開く
 const openEditModal = (task: Task) => {
-  console.log('openEditModal called with task:', task)
   editingTask.value = task
   editPoints.value = task.family_points
   editError.value = null
-  console.log('editingTask.value:', editingTask.value)
 }
 
 // 編集モーダルを閉じる
