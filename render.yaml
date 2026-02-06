@@ -1,0 +1,57 @@
+services:
+  # Rails API (backend)
+  - type: web
+    name: family-ops-api
+    env: ruby
+    rootDir: api
+    plan: free
+    buildCommand: |
+      bundle install --without development test
+    startCommand: |
+      bundle exec rails server -p $PORT -b 0.0.0.0
+    autoDeploy: true
+    healthCheckPath: /up
+    envVars:
+      # Rails 環境
+      - key: RAILS_ENV
+        value: production
+      - key: RACK_ENV
+        value: production
+      # DB 接続URLは Render の Postgres にリンクして自動注入
+      - key: DATABASE_URL
+        fromDatabase:
+          name: family-ops-db
+          property: connectionString
+
+    migrateCommand: |
+      bundle exec rails db:migrate
+
+  # Nuxt 3 (frontend)
+  - type: web
+    name: family-ops-client
+    env: node
+    rootDir: client
+    plan: free
+    buildCommand: |
+      npm ci
+      npm run build
+    startCommand: |
+      node .output/server/index.mjs
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Nuxt から見た API URL を Render のサービスURLから取得
+      - key: BASE_URL
+        fromService:
+          type: web
+          name: family-ops-api
+          property: url
+
+databases:
+  - name: family-ops-db
+    plan: free
+    databaseName: family_ops
+    user: family_ops
+
+
