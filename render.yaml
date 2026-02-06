@@ -8,7 +8,7 @@ services:
     buildCommand: |
       bundle install --without development test
     startCommand: |
-      bundle exec rails server -p $PORT -b 0.0.0.0
+      bundle exec rails db:migrate && bundle exec rails server -p $PORT -b 0.0.0.0
     autoDeploy: true
     healthCheckPath: /up
     envVars:
@@ -22,9 +22,6 @@ services:
         fromDatabase:
           name: family-ops-db
           property: connectionString
-
-    preDeployCommand: |
-      bundle exec rails db:migrate
 
   # Nuxt 3 (frontend)
   - type: web
