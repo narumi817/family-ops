@@ -23,7 +23,7 @@ services:
           name: family-ops-db
           property: connectionString
 
-    migrateCommand: |
+    postDeployCommand: |
       bundle exec rails db:migrate
 
   # Nuxt 3 (frontend)
