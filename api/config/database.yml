@@ -71,9 +71,8 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: api_production
-    username: api
-    password: <%= ENV["API_DATABASE_PASSWORD"] %>
+    # Render では DATABASE_URL が自動設定されるため、それを優先使用
+    url: <%= ENV["DATABASE_URL"] || "postgresql://#{ENV.fetch("API_DATABASE_USER", "api")}:#{ENV["API_DATABASE_PASSWORD"]}@#{ENV.fetch("DATABASE_HOST", "localhost")}/#{ENV.fetch("DATABASE_NAME", "api_production")}" %>
   cache:
     <<: *primary_production
     database: api_production_cache
