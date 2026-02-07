@@ -43,7 +43,7 @@ services:
         fromService:
           type: web
           name: family-ops-api
-          property: hostport
+          property: url
 
 databases:
   - name: family-ops-db
