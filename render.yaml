@@ -38,17 +38,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Nuxt から見た API のホストとポートを Render のサービスから取得
-      - key: API_HOST
+      # Nuxt から見た API URL を Render のサービスURLから取得
+      - key: BASE_URL
         fromService:
           type: web
           name: family-ops-api
-          property: host
-      - key: API_PORT
-        fromService:
-          type: web
-          name: family-ops-api
-          property: port
+          property: hostport
 
 databases:
   - name: family-ops-db

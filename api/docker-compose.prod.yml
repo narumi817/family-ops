@@ -7,7 +7,7 @@ services:
     environment:
       - NODE_ENV=production
       # TODO:本番APIのURL（仮）
-      - BASE_URL=https://api.example.com
+      - BASE_URL=https://family-ops-api.onrender.com
     command: node .output/server/index.mjs
     ports:
       # 必要に応じて外部公開ポートを調整
