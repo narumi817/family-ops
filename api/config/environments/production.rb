@@ -50,21 +50,38 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # メール送信エラーをログに記録（本番環境ではエラーを発生させない）
+  config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # 環境変数 MAILER_HOST が設定されていればそれを使用、なければデフォルト
+  mailer_host = ENV.fetch("MAILER_HOST", "family-ops-client.onrender.com")
+  config.action_mailer.default_url_options = {
+    host: mailer_host,
+    protocol: "https"
+  }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # SMTP設定（環境変数から読み込む）(SendGrid)
+  # SMTP_USER_NAME=apikey
+  # SMTP_PASSWORD=<SendGrid API Key>
+  # SMTP_ADDRESS=smtp.sendgrid.net
+  # SMTP_PORT=587
+  if ENV["SMTP_ADDRESS"].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: ENV.fetch("SMTP_ADDRESS"),
+      port: ENV.fetch("SMTP_PORT", "587").to_i,
+      domain: ENV.fetch("SMTP_DOMAIN", mailer_host),
+      user_name: ENV.fetch("SMTP_USER_NAME"),
+      password: ENV.fetch("SMTP_PASSWORD"),
+      authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
+      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS", "true") == "true"
+    }
+  else
+    # SMTP設定がない場合はメール送信を無効化（ログに記録のみ）
+    config.action_mailer.delivery_method = :test
+    Rails.logger.warn "SMTP settings not configured. Emails will not be sent in production."
+  end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
