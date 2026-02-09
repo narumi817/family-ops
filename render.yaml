@@ -22,14 +22,11 @@ services:
         fromDatabase:
           name: family-ops-db
           property: connectionString
-      # メール送信設定（SendGrid）
-      # Render のダッシュボードで以下の環境変数を手動で設定
-      # SMTP_USER_NAME=apikey
-      # SMTP_PASSWORD=<SendGrid API Key>
-      # SMTP_ADDRESS=smtp.sendgrid.net
-      # SMTP_PORT=587
-      # SMTP_DOMAIN=family-ops-client.onrender.com
-      # MAILER_HOST=family-ops-client.onrender.com
+      # メール送信設定（Resend）
+      # Render のダッシュボードで以下の環境変数を手動で設定してください:
+      # RESEND_API_KEY      : Resend の API キー
+      # RESEND_FROM_EMAIL   : 送信元メールアドレス (例: "FamilyOps <no-reply@your-domain>")
+      # MAILER_HOST         : メール本文内リンクのホスト (例: family-ops-client.onrender.com)
 
   # Nuxt 3 (frontend)
   - type: web

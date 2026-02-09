@@ -53,35 +53,19 @@ Rails.application.configure do
   # メール送信エラーをログに記録（本番環境ではエラーを発生させない）
   config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates.
-  # 環境変数 MAILER_HOST が設定されていればそれを使用、なければデフォルト
+  # メール本文中のURL生成に使用するホスト名
+  # 例: MAILER_HOST=family-ops-client.onrender.com
   mailer_host = ENV.fetch("MAILER_HOST", "family-ops-client.onrender.com")
   config.action_mailer.default_url_options = {
     host: mailer_host,
     protocol: "https"
   }
 
-  # SMTP設定（環境変数から読み込む）(SendGrid)
-  # SMTP_USER_NAME=apikey
-  # SMTP_PASSWORD=<SendGrid API Key>
-  # SMTP_ADDRESS=smtp.sendgrid.net
-  # SMTP_PORT=587
-  if ENV["SMTP_ADDRESS"].present?
-    config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = {
-      address: ENV.fetch("SMTP_ADDRESS"),
-      port: ENV.fetch("SMTP_PORT", "587").to_i,
-      domain: ENV.fetch("SMTP_DOMAIN", mailer_host),
-      user_name: ENV.fetch("SMTP_USER_NAME"),
-      password: ENV.fetch("SMTP_PASSWORD"),
-      authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
-      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS", "true") == "true"
-    }
-  else
-    # SMTP設定がない場合はメール送信を無効化（ログに記録のみ）
-    config.action_mailer.delivery_method = :test
-    Rails.logger.warn "SMTP settings not configured. Emails will not be sent in production."
-  end
+  # Resend を使ったメール送信設定
+  # 必要な環境変数:
+  # RESEND_API_KEY      : Resend の API キー
+  # RESEND_FROM_EMAIL   : 送信元メールアドレス (例: "FamilyOps <no-reply@your-domain>")
+  config.action_mailer.delivery_method = :resend
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
