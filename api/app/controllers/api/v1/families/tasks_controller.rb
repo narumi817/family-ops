@@ -19,6 +19,26 @@ module Api
           }, status: :ok
         end
 
+        # 家族に紐づくタスクを登録する
+        # POST /api/v1/families/:family_id/tasks
+        # @param name [String] タスク名（必須、最大20文字）
+        # @param category [String] カテゴリ（childcare/housework、必須）
+        # @param points [Integer] ポイント数（任意、0〜100、未指定時は0）
+        # @return [JSON] 作成されたタスク情報
+        def create
+          task_params = create_task_params
+          result = FamilyTaskPointService.create_task(@family, task_params)
+
+          unless result[:success]
+            error_message = result[:errors].first || "タスクの作成に失敗しました"
+            render json: { error: error_message, errors: result[:errors] }, status: :unprocessable_content
+            return
+          end
+
+          task = result[:task]
+          render json: task_response(task), status: :created
+        end
+
         # タスクのポイントを更新する
         # PUT /api/v1/families/:id/tasks/:task_id/points
         # PATCH /api/v1/families/:id/tasks/:task_id/points
@@ -40,13 +60,7 @@ module Api
           end
 
           family_task_point = result[:family_task_point]
-          render json: {
-            id: family_task_point.id,
-            family_id: family_task_point.family_id,
-            task_id: family_task_point.task_id,
-            points: family_task_point.points,
-            updated_at: family_task_point.updated_at
-          }, status: :ok
+          render json: family_task_point_response(family_task_point), status: :ok
         end
 
         private
@@ -54,7 +68,7 @@ module Api
         # 家族を設定する
         # @return [Family, nil] 家族オブジェクト
         def set_family
-          @family = ::Family.find_by(id: params[:family_id])
+          @family = ::Family.find_by(id: params[:family_id] || params[:id])
           unless @family
             render json: { error: "家族が見つかりません" }, status: :not_found
           end
@@ -82,6 +96,25 @@ module Api
             family_points: family_points,
             is_custom: task.family_id.present?
           }
+        end
+
+        # FamilyTaskPointレスポンス用のハッシュを生成する
+        # @param family_task_point [FamilyTaskPoint] 家族タスクポイントオブジェクト
+        # @return [Hash] レスポンス用のハッシュ
+        def family_task_point_response(family_task_point)
+          {
+            id: family_task_point.id,
+            family_id: family_task_point.family_id,
+            task_id: family_task_point.task_id,
+            points: family_task_point.points,
+            updated_at: family_task_point.updated_at
+          }
+        end
+
+        # タスク作成時のパラメータを許可する
+        # @return [Hash] シンボルキーのパラメータ
+        def create_task_params
+          params.require(:task).permit(:name, :category, :points).to_h.symbolize_keys
         end
       end
     end

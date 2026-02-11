@@ -13,9 +13,15 @@ class Task < ApplicationRecord
   has_many :families, through: :family_task_points
 
   # バリデーション
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: { scope: :family_id }
   validates :category, presence: true
-  validates :points, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :points,
+            presence: true,
+            numericality: {
+              only_integer: true,
+              greater_than_or_equal_to: 0,
+              less_than_or_equal_to: 100
+            }
 
   # スコープ
   # @param category [Symbol, Integer] カテゴリ（:childcare, :housework, :other または 1, 2, 3）

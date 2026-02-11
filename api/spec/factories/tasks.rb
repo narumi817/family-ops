@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :task do
-    name { "テストタスク" }
+    sequence(:name) { |n| "テストタスク#{n}" }
     description { "テスト用のタスクです" }
     category { :housework }
     points { 10 }

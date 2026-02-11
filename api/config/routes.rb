@@ -24,7 +24,7 @@ Rails.application.routes.draw do
       # 家族関連
       resources :families, only: [] do
         post :invitations, to: "families/invitations#create"
-        resources :tasks, only: [:index], controller: "families/tasks" do
+        resources :tasks, only: [:index, :create], controller: "families/tasks" do
           member do
             put :points, to: "families/tasks#update_points"
             patch :points, to: "families/tasks#update_points"
