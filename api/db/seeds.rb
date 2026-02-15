@@ -1,5 +1,12 @@
 # FamilyOps 初期データ投入
 
+# 既にマスターデータが存在する場合はスキップ
+if Task.where(family_id: nil).exists?
+  puts "マスターデータは既に投入済みです。スキップします。"
+  puts "現在のタスク数: #{Task.count}件"
+  exit
+end
+
 # 育児カテゴリのタスク
 childcare_tasks = [
   { name: "おむつ替え", description: "赤ちゃんのおむつを交換", points: 10 },
