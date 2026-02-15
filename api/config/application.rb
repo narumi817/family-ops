@@ -42,8 +42,19 @@ module Api
     config.api_only = true
 
     # Cookie と Session のミドルウェアを追加（Cookieベースの認証用）
-    # 環境ごとの詳細設定は config/environments/*.rb で行う
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore, key: '_family_ops_session'
+    
+    # 環境ごとにセッション設定を分岐
+    if Rails.env.production?
+      # 本番環境: クロスドメイン対応のため SameSite=None を設定
+      config.middleware.use ActionDispatch::Session::CookieStore,
+        key: '_family_ops_session',
+        secure: true,        # HTTPSのみで送信（SameSite=None の要件）
+        same_site: :none,    # クロスドメインでもCookieを送信可能
+        httponly: true       # JavaScriptからアクセス不可（セキュリティ）
+    else
+      # 開発・テスト環境: 通常の設定
+      config.middleware.use ActionDispatch::Session::CookieStore, key: '_family_ops_session'
+    end
   end
 end
