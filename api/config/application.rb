@@ -42,6 +42,7 @@ module Api
     config.api_only = true
 
     # Cookie と Session のミドルウェアを追加（Cookieベースの認証用）
+    # 環境ごとの詳細設定は config/environments/*.rb で行う
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: '_family_ops_session'
   end

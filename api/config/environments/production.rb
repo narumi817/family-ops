@@ -31,10 +31,12 @@ Rails.application.configure do
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # セッションCookie設定（クロスドメイン対応）
+  # application.rb で追加されたミドルウェアを再設定して、SameSite=None を適用
   # domain を設定しないことで、Cookieは送信元ドメイン（APIドメイン）に設定される
   # クライアント側で credentials: 'include' を指定することで、クロスドメインでもCookieが送信される
   # SameSite=None は Secure: true とセットで使用する必要がある（既に設定済み）
-  config.session_store :cookie_store,
+  config.middleware.delete ActionDispatch::Session::CookieStore
+  config.middleware.use ActionDispatch::Session::CookieStore,
     key: '_family_ops_session',
     secure: true,        # HTTPSのみで送信（SameSite=None の要件）
     same_site: :none,    # クロスドメインでもCookieを送信可能（LaxではPOSTレスポンスで設定できない）
