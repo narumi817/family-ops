@@ -8,9 +8,7 @@ services:
     buildCommand: |
       bundle install --without development test
     startCommand: |
-      bundle exec rails server -p $PORT -b 0.0.0.0
-    postDeployCommand: |
-      bundle exec rails db:migrate && bundle exec rails db:seed
+      bundle exec rails db:migrate && bundle exec rails db:seed && bundle exec rails server -p $PORT -b 0.0.0.0
     autoDeploy: true
     healthCheckPath: /up
     envVars:
