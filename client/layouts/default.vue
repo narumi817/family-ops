@@ -32,6 +32,13 @@
             >
               ダッシュボード
             </NuxtLink>
+            <NuxtLink
+              v-if="authStore.family"
+              :to="`/families/${authStore.family.id}/invitations/new`"
+              class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+            >
+              家族を招待
+            </NuxtLink>
             <!-- 将来実装: 家族一覧 -->
             <!-- <NuxtLink
               to="/families"
