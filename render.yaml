@@ -44,11 +44,9 @@ services:
       - key: NODE_ENV
         value: production
       # Nuxt から見た API URL を Render のサービスURLから取得
+      # 例: value: https://api.your-domain.com
       - key: BASE_URL
-        fromService:
-          type: web
-          name: family-ops-api
-          property: hostport
+        value: https://family-ops-api.onrender.com
 
 databases:
   - name: family-ops-db
