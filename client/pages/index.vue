@@ -49,7 +49,7 @@
           <!-- 当日の累計ポイント -->
           <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-6">
             <div class="text-center">
-              <p class="text-sm text-gray-600 mb-2">今日のポイント</p>
+              <p class="text-sm text-gray-600 mb-2">今日のあなたのポイント</p>
               <p class="text-4xl sm:text-5xl font-bold text-orange-500 mb-1">
                 {{ todayPoints }}
               </p>

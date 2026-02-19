@@ -6,36 +6,21 @@
         <div class="flex items-center justify-between">
           <!-- ロゴ -->
           <NuxtLink to="/" class="flex items-center space-x-2">
-            <div class="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full">
-              <svg
-                class="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
-            <h1 class="text-xl font-bold text-gray-800">FamilyOps</h1>
+            <BrandLogo />
           </NuxtLink>
 
-          <!-- ナビゲーションメニュー -->
-          <nav class="flex items-center space-x-4">
+        <!-- ナビゲーションメニュー -->
+        <nav class="flex items-center space-x-[2px] sm:space-x-2">
             <NuxtLink
               to="/"
-              class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+              class="rounded-full px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 transition-colors sm:text-sm"
             >
               ダッシュボード
             </NuxtLink>
             <NuxtLink
               v-if="authStore.family"
               :to="`/families/${authStore.family.id}/invitations/new`"
-              class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
+              class="rounded-full px-3 py-1 text-xs font-semibold text-orange-600 ring-2 ring-orange-300/70 hover:bg-orange-50 transition-colors sm:text-sm"
             >
               家族を招待
             </NuxtLink>
@@ -53,6 +38,14 @@
             >
               ログ投稿
             </NuxtLink> -->
+            <!-- 使い方ヘルプ -->
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-xs font-semibold text-gray-500 hover:border-orange-300 hover:text-orange-500"
+              @click="showHelp = true"
+            >
+              ?
+            </button>
             <button
               @click="handleLogout"
               class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors"
@@ -68,12 +61,20 @@
     <main class="container mx-auto px-4 py-8">
       <slot />
     </main>
+
+    <!-- 使い方モーダル -->
+    <HelpGuideModal v-if="showHelp" @close="showHelp = false" />
   </div>
 </template>
 
 <script setup lang="ts">
+import HelpGuideModal from '~/components/organisms/HelpGuideModal.vue'
+import BrandLogo from '~/components/atoms/BrandLogo.vue'
+
 const authStore = useAuthStore()
 const router = useRouter()
+
+const showHelp = ref(false)
 
 const handleLogout = async () => {
   await authStore.logout()
