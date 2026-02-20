@@ -14,7 +14,9 @@ unless Rails.env.test?
       if Rails.env.development?
         origins "http://localhost:3001", "http://localhost:3000", /http:\/\/localhost(:\d+)?/
       else
-        origins ENV.fetch("ALLOWED_ORIGINS", "").split(",")
+        # ALLOWED_ORIGINS が空の場合は空配列を返す（CORSエラーになるが、設定漏れを防ぐ）
+        allowed_origins = ENV.fetch("ALLOWED_ORIGINS", "").split(",").map(&:strip).reject(&:empty?)
+        origins allowed_origins
       end
 
       # 本番環境で直接オリジンを指定する場合の例（上記の行をコメントアウトして、こちらを有効化）:
@@ -23,7 +25,8 @@ unless Rails.env.test?
       resource "*",
         headers: :any,
         methods: [:get, :post, :put, :patch, :delete, :options, :head],
-        credentials: true
+        credentials: true,
+        expose: ['Set-Cookie']  # Cookie関連のヘッダーをクライアント側で確認可能にする
     end
   end
 end

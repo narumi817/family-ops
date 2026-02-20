@@ -22,6 +22,11 @@ services:
         fromDatabase:
           name: family-ops-db
           property: connectionString
+      # CORS設定（クライアントのオリジンを許可）
+      # 独自ドメインを使っている場合は、そのドメインを指定してください
+      # 例: value: https://your-domain.com,https://www.your-domain.com
+      - key: ALLOWED_ORIGINS
+        value: https://mizk.net,https://www.mizk.net
       # メール送信設定（Resend）
       # Render のダッシュボードで以下の環境変数を手動で設定してください:
       # RESEND_API_KEY      : Resend の API キー
