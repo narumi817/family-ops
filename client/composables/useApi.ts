@@ -12,6 +12,9 @@ export const useApi = () => {
         'Content-Type': 'application/json',
         ...options.headers,
       },
+      // キャッシュを無効化（304 Not Modified を防ぐ）
+      getCachedData: () => null,
+      key: `${url}-${Date.now()}`, // 動的なキーでキャッシュを回避
     })
   }
 
@@ -24,6 +27,7 @@ export const useApi = () => {
         credentials: 'include', // Cookie認証のために必要
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache', // キャッシュを無効化
           ...options.headers,
         },
       })

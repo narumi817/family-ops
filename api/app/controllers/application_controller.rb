@@ -1,7 +1,17 @@
 class ApplicationController < ActionController::API
   include ActionController::Cookies
 
+  # APIレスポンスでキャッシュを無効化（304 Not Modified を防ぐ）
+  before_action :set_no_cache_headers
+
   protected
+
+  # キャッシュを無効化するヘッダーを設定
+  def set_no_cache_headers
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+  end
 
   # 現在のユーザーを取得する
   # セッションからuser_idを取得してUserを検索

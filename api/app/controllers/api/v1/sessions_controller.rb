@@ -27,6 +27,10 @@ module Api
       # GET /api/v1/logged_in
       # @return [JSON] ユーザー情報（ログイン中）または logged_in: false（未ログイン）
       def logged_in
+        # デバッグ用: セッション情報をログに出力（本番環境では削除推奨）
+        Rails.logger.debug "Session user_id: #{session[:user_id].inspect}"
+        Rails.logger.debug "Current user: #{current_user&.id.inspect}"
+        
         return render_logged_out unless current_user
 
         render_user_info(current_user)
