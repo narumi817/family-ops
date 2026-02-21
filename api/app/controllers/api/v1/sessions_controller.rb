@@ -12,6 +12,10 @@ module Api
         return render_unauthorized unless user&.authenticate(params[:password])
 
         session[:user_id] = user.id
+        Rails.logger.info "Login: Session user_id set to #{session[:user_id].inspect}"
+        Rails.logger.info "Login: Session exists: #{session.exists?}"
+        Rails.logger.info "Login: Cookie header: #{request.headers['Cookie'].inspect}"
+        
         render_user_info(user)
       end
 
@@ -28,9 +32,10 @@ module Api
       # @return [JSON] ユーザー情報（ログイン中）または logged_in: false（未ログイン）
       def logged_in
         # セッション情報をログに出力（infoレベルで本番環境でも出力される）
-        Rails.logger.info "Session user_id: #{session[:user_id].inspect}"
-        Rails.logger.info "Current user: #{current_user&.id.inspect}"
-        Rails.logger.info "Session exists: #{session.exists?}"
+        Rails.logger.info "LoggedIn: Cookie header: #{request.headers['Cookie'].inspect}"
+        Rails.logger.info "LoggedIn: Session user_id: #{session[:user_id].inspect}"
+        Rails.logger.info "LoggedIn: Current user: #{current_user&.id.inspect}"
+        Rails.logger.info "LoggedIn: Session exists: #{session.exists?}"
         
         return render_logged_out unless current_user
 
