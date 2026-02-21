@@ -10,12 +10,10 @@ export const useApi = () => {
       credentials: 'include', // Cookie認証のために必要
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache', // キャッシュを無効化
         ...options.headers,
       },
-      // キャッシュを無効化（304 Not Modified を防ぐ）
-      getCachedData: () => null,
-      key: `${url}-${Date.now()}`, // 動的なキーでキャッシュを回避
-    })
+    }) as ReturnType<typeof useFetch<T>>
   }
 
   // イベントハンドラ内で使用（$fetch）
@@ -32,9 +30,9 @@ export const useApi = () => {
         },
       })
       return {
-        data: ref(data),
+        data: ref(data as T | null),
         error: ref(null),
-      }
+      } as { data: Ref<T | null>; error: Ref<any> }
     } catch (err: any) {
       return {
         data: ref(null),
