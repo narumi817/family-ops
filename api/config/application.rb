@@ -46,12 +46,12 @@ module Api
     
     # 環境ごとにセッション設定を分岐
     if Rails.env.production?
-      # 本番環境: クロスドメイン対応のため SameSite=None を設定
-      # SafariやモバイルChromeでも確実にCookieをセットするため、pathを明示的に設定
+      # 本番環境: サブドメイン間（mizk.net ↔ api.mizk.net）では SameSite=Lax で動作
+      # Safariでも確実にCookieをセットするため、pathを明示的に設定
       config.middleware.use ActionDispatch::Session::CookieStore,
         key: '_family_ops_session',
-        secure: true,        # HTTPSのみで送信（SameSite=None の要件）
-        same_site: :none,    # クロスドメインでもCookieを送信可能
+        secure: true,        # HTTPSのみで送信
+        same_site: :lax,     # サブドメイン間では Lax で動作（Safari対応）
         httponly: true,      # JavaScriptからアクセス不可（セキュリティ）
         path: '/'            # Cookieのパスを明示的に設定
     else

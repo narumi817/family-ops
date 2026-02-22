@@ -46,10 +46,9 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Nuxt から見た API URL を Render のサービスURLから取得
-      # 例: value: https://api.your-domain.com
+      # Nuxt から見た API URL（サブドメイン）
       - key: BASE_URL
-        value: https://family-ops-api.onrender.com
+        value: https://api.mizk.net
 
 databases:
   - name: family-ops-db
