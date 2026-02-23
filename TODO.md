@@ -89,7 +89,7 @@
 - [ ] パスワード忘れ対応
     - [ ] メール送信
     - [ ] パスワード再設定
-- [ ] JWT認証の実装（オプション）
+- [ ] JWT認証の実装（検討）
   - [ ] jwt gemの追加
   - [ ] トークン生成・検証ロジック
 
@@ -105,186 +105,61 @@
   - [ ] provider/uidでの検索・作成ロジック
   - [ ] パスワードサインアップ/招待サインアップ/OAuthサインアップのService共通化・リファクタリング検討（SignupService, InvitationSignupService など）
 
-## 📝 モデル実装
+## 🎨 画面
 
-- [x] Userモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-  - [x] スコープ・メソッド
-- [x] Taskモデル
-  - [x] Enum定義（category）
-  - [x] アソシエーション定義
-  - [x] バリデーション
-- [x] Logモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-  - [x] スコープ（日付範囲、ユーザー別など）
-- [x] Familyモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-- [x] FamilyMemberモデル
-  - [x] Enum定義（role）
-  - [x] アソシエーション定義
-  - [x] バリデーション
-- [x] FamilyTaskPointモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-  - [x] ユニーク制約
-- [x] EmailVerificationモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-  - [x] トークン生成・検証ロジック（クラスメソッド）
-  - [x] スコープ・メソッド
-- [x] FamilyInvitationモデル
-  - [x] アソシエーション定義
-  - [x] バリデーション
-  - [x] トークン生成・検証ロジック（クラスメソッド）
-  - [x] スコープ・メソッド
-
-## 🛣️ APIエンドポイント実装
-
-### 認証関連
-
-- [x] POST /api/v1/signup - ユーザー登録
-  - [x] 画面からのサインアップ
-    - [x] POST /api/v1/signup/email - メールアドレス登録・確認メール送信
-    - [x] GET /api/v1/signup/verify - メールアドレス認証
-    - [x] POST /api/v1/signup/complete - ユーザー情報登録完了
-  - [x] 招待によるサインアップ
-    - [x] POST /api/v1/families/:id/invitations - 招待メール送信
-    - [x] GET /api/v1/invitations/verify - 招待トークン検証
-    - [x] POST /api/v1/invitations/complete - 招待受諾完了
-- [x] POST /api/v1/login - ログイン
-- [x] DELETE /api/v1/logout - ログアウト
-- [x] GET /api/v1/logged_in - ログイン状態確認
-- [ ] GET /api/v1/auth/google - Google認証開始
-- [ ] GET /api/v1/auth/google/callback - Google認証コールバック
-
-### ユーザー関連
-
-- [ ] GET /api/users - ユーザー一覧（認証済み）
-- [ ] GET /api/users/:id - ユーザー詳細
-- [ ] PATCH /api/users/:id - ユーザー更新
-
-### タスク関連
-
-- [ ] GET /api/tasks - タスク一覧
-- [ ] GET /api/tasks/:id - タスク詳細
-- [ ] POST /api/tasks - タスク作成
-- [ ] PATCH /api/tasks/:id - タスク更新
-- [ ] DELETE /api/tasks/:id - タスク削除
-
-### ログ関連
-
-- [x] GET /api/v1/family/logs - 家族のログ一覧（フィルタリング・ページング対応）
-- [ ] GET /api/v1/logs/:id - ログ詳細
-- [x] POST /api/v1/logs - ログ作成
-- [ ] PATCH /api/v1/logs/:id - ログ更新
-- [ ] DELETE /api/v1/logs/:id - ログ削除
-
-### 家族関連
-
-- [ ] GET /api/families - 家族一覧（認証済みユーザーの家族）
-- [ ] GET /api/families/:id - 家族詳細
-- [ ] POST /api/families - 家族作成
-- [ ] PATCH /api/families/:id - 家族更新
-- [ ] DELETE /api/families/:id - 家族削除
-- [ ] POST /api/families/:id/members - 家族メンバー追加
-- [ ] DELETE /api/families/:id/members/:user_id - 家族メンバー削除
-
-### ポイント設定関連
-
-- [ ] GET /api/families/:id/task_points - 家族のタスクポイント一覧
-- [ ] POST /api/families/:id/task_points - タスクポイント設定
-- [ ] PATCH /api/families/:id/task_points/:id - タスクポイント更新
-- [ ] DELETE /api/families/:id/task_points/:id - タスクポイント削除
-
-## 🧪 テスト実装
-
-### モデルテスト
-
-- [ ] Userモデルのテスト
-- [ ] Taskモデルのテスト
-- [ ] Logモデルのテスト
-- [ ] Familyモデルのテスト
-- [ ] FamilyMemberモデルのテスト
-- [ ] FamilyTaskPointモデルのテスト
-- [ ] EmailVerificationモデルのテスト
-- [ ] FamilyInvitationモデルのテスト
-
-### リクエストテスト
-
-- [x] 認証関連のテスト（SessionsController）
-  - [x] ログイン成功時のテスト
-  - [x] ログイン失敗時のテスト
-  - [x] ログアウトのテスト
-  - [x] ログイン状態確認のテスト
-- [x] サインアップ関連のテスト
-  - [x] POST /api/v1/signup/email のテスト（正常系・異常系）
-  - [x] GET /api/v1/signup/verify のテスト（正常系・異常系）
-  - [x] POST /api/v1/signup/complete のテスト（正常系・異常系）
-  - [x] POST /api/v1/families/:id/invitations のテスト（正常系・異常系）
-  - [x] GET /api/v1/invitations/verify のテスト（正常系・異常系）
-  - [x] POST /api/v1/invitations/complete のテスト（正常系・異常系）
-- [ ] ユーザー関連のテスト
-- [ ] タスク関連のテスト
-- [x] ログ関連のテスト
-  - [x] POST /api/v1/logs のテスト（正常系・異常系）
-  - [x] GET /api/v1/family/logs のテスト（正常系・異常系）
-- [ ] 家族関連のテスト
-- [ ] ポイント設定関連のテスト
-
-### Factory定義
-
-- [x] User Factory
-- [x] Task Factory
-- [x] Log Factory
-- [x] Family Factory
-- [x] FamilyMember Factory
-- [ ] FamilyTaskPoint Factory
-- [ ] EmailVerification Factory
-- [ ] FamilyInvitation Factory
-
-## 🎨 フロントエンド実装
+- モバイルファーストデザイン
+- 片手操作しやすいボタンサイズ
+- 温かみのあるデザイン
 
 ### 認証画面
 
 - [x] ログイン画面
-  - [x] モバイルファーストデザイン
-  - [x] 片手操作しやすいボタンサイズ
-  - [x] 温かみのあるデザイン
 - [x] 認証前共通レイアウト（layouts/auth.vue）
 - [x] サインアップ画面（通常フロー）
   - [x] /signup/email（メールアドレス入力）
   - [x] /signup/email_sent（確認メール送信完了）
   - [x] /signup/verify（メール認証）
   - [x] /signup/complete（ユーザー情報登録）
-- [ ] 招待フロー画面
-  - [ ] /invitations/verify（招待トークン確認）
-  - [ ] /invitations/complete（招待受諾）
+- [x] 招待フロー画面
+  - [x] /invitations/verify（招待トークン確認）
+  - [x] /invitations/complete（招待受諾）
 - [ ] Google認証ボタン
-- [x] 認証状態管理（Pinia）
+- [ ] パスワード忘れ
 
 ### ダッシュボード
 
-- [ ] ホーム画面
-- [ ] ログ一覧表示
-- [ ] ログ作成フォーム
+- [x] ホーム画面
+  - [x] 当日の累計ポイント表示
+- [x] ログ一覧表示
+  - 当日のログをタイムライン表示
+  - 当日の累計ポイント表示
+  - 実行者の色分け
+  - メモ表示
+- [x] ログ作成フォーム
+  - タスク選択
+  - 実行時間選択
+  - メモ入力
+  - ログ作成API呼び出し
+- [ ] ログ削除
 - [ ] 統計情報表示
+- [ ] ログイン後共通レイアウト（ナビゲーション整理）
 
 ### タスク管理
 
-- [ ] タスク一覧画面
+- [x] タスク一覧画面
 - [ ] タスク作成・編集画面
 - [ ] タスク削除機能
+  - 家族独自のタスクのみが対象
 
 ### 家族管理
 
 - [ ] 家族一覧画面
 - [ ] 家族作成・編集画面
 - [ ] 家族メンバー管理画面
-- [ ] 家族招待UI（メール送信 / QRコード表示・読み取り）
-- [ ] タスクポイント設定画面
+- [ ] 家族招待UI
+  - [x] メール送信
+  - [ ] QRコード表示・読み取り
+- [x] タスクポイント設定画面
 
 ### ユーザー設定
 
@@ -316,8 +191,8 @@
 - [x] タスクポイント変更API実装 (PUT /api/v1/families/:id/tasks/:task_id/points)
   - FamilyTaskPointの作成・更新
 - [x] タスクマスタ管理画面実装 (/families/[id]/tasks)
-  - タスク一覧表示（タスク名、カテゴリ、ポイント、説明）
-  - ポイント編集UI
+  - [x] タスク一覧表示（タスク名、カテゴリ、ポイント、説明）
+  - [x] ポイント編集UI
 
 ### Phase 3: 拡張機能（将来）
 
@@ -340,18 +215,13 @@
 
 ## 🚀 デプロイ準備
 
-- [ ] 本番環境の設定
-- [ ] 環境変数の管理
-- [ ] データベースマイグレーション
+- [x] 本番環境の設定
+- [x] 環境変数の管理
+- [x] データベースマイグレーション
 - [ ] エラーハンドリング
-- [ ] ログ設定
+- [x] ログ設定
 - [ ] パフォーマンス最適化
 
-## 📚 ドキュメント
-
-- [ ] API仕様書の作成
-- [ ] セットアップガイドの作成
-- [ ] 開発ガイドの作成
 
 ## 🔧 リファクタリング（モデルが大きくなった時）
 
@@ -378,7 +248,6 @@
 - [ ] 複数のスコープを組み合わせた複雑な検索をQuery Objectに分離
 
 ### 注意点
-
 - モデルが小規模（50行未満）の場合は、無理に分離しない
 - 単一モデル専用のロジックはモデル内に残す
 - 過度な抽象化は可読性を下げる可能性がある
