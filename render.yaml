@@ -18,8 +18,7 @@ services:
       - key: RACK_ENV
         value: production
       # DB 接続URL（Neon）
-      - key: DATABASE_URL
-        value: "postgresql://neondb_owner:npg_8NqsLjIfFo2k@ep-shy-fog-a1c78byj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      # Renderのダッシュボード上で DATABASE_URL を手動設定
       # CORS設定（クライアントのオリジンを許可）
       - key: ALLOWED_ORIGINS
         value: https://mizk.net,https://www.mizk.net
