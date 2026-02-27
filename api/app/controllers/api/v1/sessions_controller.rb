@@ -12,6 +12,7 @@ module Api
         return render_unauthorized unless user&.authenticate(params[:password])
 
         session[:user_id] = user.id
+        user.update!(last_login_at: Time.current)
         render_user_info(user)
       end
 

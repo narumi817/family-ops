@@ -25,6 +25,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
         expect(json_response["family"]["id"]).to eq(family.id)
         expect(json_response["family"]["name"]).to eq("テスト家族")
         expect(session[:user_id]).to eq(user.id)
+        expect(user.reload.last_login_at).not_to be_nil
       end
 
       it "ログインに成功し、家族に所属していない場合はfamilyがnullになる" do
@@ -40,6 +41,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
         expect(json_response["user"]["id"]).to eq(user.id)
         expect(json_response["family"]).to be_nil
         expect(session[:user_id]).to eq(user.id)
+        expect(user.reload.last_login_at).not_to be_nil
       end
     end
 
