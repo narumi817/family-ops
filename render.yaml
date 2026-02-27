@@ -17,11 +17,9 @@ services:
         value: production
       - key: RACK_ENV
         value: production
-      # DB 接続URLは Render の Postgres にリンクして自動注入
+      # DB 接続URL（Neon）
       - key: DATABASE_URL
-        fromDatabase:
-          name: family-ops-db
-          property: connectionString
+        value: "postgresql://neondb_owner:npg_8NqsLjIfFo2k@ep-shy-fog-a1c78byj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
       # CORS設定（クライアントのオリジンを許可）
       - key: ALLOWED_ORIGINS
         value: https://mizk.net,https://www.mizk.net
@@ -49,11 +47,3 @@ services:
       # Nuxt から見た API URL（サブドメイン）
       - key: BASE_URL
         value: https://api.mizk.net
-
-databases:
-  - name: family-ops-db
-    plan: free
-    databaseName: family_ops
-    user: family_ops
-
-
