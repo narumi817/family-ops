@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_25_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_03_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,6 +82,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_000000) do
     t.index ["user_id"], name: "index_logs_on_user_id"
   end
 
+  create_table "password_reset_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.datetime "token_expired_at", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_password_reset_tokens_on_token", unique: true
+    t.index ["token_expired_at"], name: "index_password_reset_tokens_on_token_expired_at"
+    t.index ["user_id"], name: "index_password_reset_tokens_on_user_id"
+  end
+
   create_table "tasks", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -117,5 +129,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_000000) do
   add_foreign_key "family_task_points", "tasks", on_delete: :restrict
   add_foreign_key "logs", "tasks", on_delete: :restrict
   add_foreign_key "logs", "users", on_delete: :restrict
+  add_foreign_key "password_reset_tokens", "users"
   add_foreign_key "tasks", "families", on_delete: :cascade
 end

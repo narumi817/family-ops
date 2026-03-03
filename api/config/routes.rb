@@ -49,6 +49,9 @@ Rails.application.routes.draw do
         get  :verify
         post :complete
       end
+
+      # パスワードリセット
+      post "password_reset", to: "password_reset#create"
     end
   end
 
