@@ -66,5 +66,68 @@ RSpec.describe "Api::V1::PasswordReset", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/password_reset/verify" do
+    context "正常系" do
+      it "有効なトークンの場合、メールアドレスを返す" do
+        user = create(:user, email: "user@example.com", password: "password123", password_confirmation: "password123")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "valid-token",
+          token_expired_at: 1.hour.from_now
+        )
+
+        get "/api/v1/password_reset/verify", params: { token: token.token }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["email"]).to eq(user.email)
+      end
+    end
+
+    context "異常系" do
+      it "トークンが未指定の場合、400を返す" do
+        get "/api/v1/password_reset/verify", params: {}
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("トークンが指定されていません")
+      end
+
+      it "存在しないトークンの場合、400を返す" do
+        get "/api/v1/password_reset/verify", params: { token: "unknown-token" }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "期限切れトークンの場合、400を返す" do
+        user = create(:user, email: "expired@example.com", password: "password123", password_confirmation: "password123")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "expired-token",
+          token_expired_at: 1.hour.ago
+        )
+
+        get "/api/v1/password_reset/verify", params: { token: token.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "既に使用済みのトークンの場合、400を返す" do
+        user = create(:user, email: "used@example.com", password: "password123", password_confirmation: "password123")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "used-token",
+          token_expired_at: 1.hour.from_now,
+          used_at: Time.current
+        )
+
+        get "/api/v1/password_reset/verify", params: { token: token.token }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+    end
+  end
 end
 

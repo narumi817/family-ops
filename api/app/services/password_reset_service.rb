@@ -13,6 +13,15 @@ class PasswordResetService
       token = PasswordResetToken.find_or_create_for(user)
       PasswordResetMailer.reset_email(token).deliver_now
     end
+
+    # パスワードリセットトークンを検証する
+    # @param token [String] トークン
+    # @return [PasswordResetToken, nil] 有効なトークンがあれば返し、なければnil
+    def verify_token(token)
+      return nil if token.blank?
+
+      PasswordResetToken.by_token(token).valid.first
+    end
   end
 end
 

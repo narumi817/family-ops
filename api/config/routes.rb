@@ -51,7 +51,10 @@ Rails.application.routes.draw do
       end
 
       # パスワードリセット
-      post "password_reset", to: "password_reset#create"
+      scope :password_reset, controller: :password_reset do
+        post "/", action: :create
+        get  :verify
+      end
     end
   end
 
