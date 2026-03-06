@@ -33,8 +33,11 @@ class PasswordResetMailer < ApplicationMailer
     options = Rails.application.config.action_mailer.default_url_options || {}
     host = options[:host] || "localhost"
     protocol = options[:protocol] || "https"
+    port = options[:port]
 
-    "#{protocol}://#{host}/password-reset?token=#{token}"
+    port_part = port.present? ? ":#{port}" : ""
+
+    "#{protocol}://#{host}#{port_part}/password-reset?token=#{token}"
   end
 end
 

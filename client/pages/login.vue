@@ -86,6 +86,16 @@
           </button>
         </form>
 
+        <!-- パスワードリセットリンク -->
+        <div class="mt-4 text-center">
+          <NuxtLink
+            to="/forgot-password"
+            class="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors"
+          >
+            パスワードをお忘れの方はこちら
+          </NuxtLink>
+        </div>
+
         <!-- デコレーション -->
         <div class="mt-6 text-center">
           <div class="inline-flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
