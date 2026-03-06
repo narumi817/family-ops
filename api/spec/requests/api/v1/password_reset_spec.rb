@@ -129,5 +129,127 @@ RSpec.describe "Api::V1::PasswordReset", type: :request do
       end
     end
   end
+
+  describe "POST /api/v1/password_reset/complete" do
+    context "正常系" do
+      it "有効なトークンとパスワードでユーザーのパスワードを更新し、トークンを使用済みにする" do
+        user = create(:user, email: "reset@example.com", password: "oldpassword", password_confirmation: "oldpassword")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "reset-token",
+          token_expired_at: 1.hour.from_now
+        )
+
+        post "/api/v1/password_reset/complete", params: {
+          token: token.token,
+          password: "newpassword",
+          password_confirmation: "newpassword"
+        }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["message"]).to eq("パスワードを更新しました")
+
+        expect(user.reload.authenticate("newpassword")).to be_truthy
+        expect(token.reload.used_at).to be_present
+      end
+    end
+
+    context "異常系" do
+      it "トークンが未指定の場合、400を返す" do
+        post "/api/v1/password_reset/complete", params: {
+          password: "newpassword",
+          password_confirmation: "newpassword"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("トークンが指定されていません")
+      end
+
+      it "存在しないトークンの場合、400を返す" do
+        post "/api/v1/password_reset/complete", params: {
+          token: "unknown-token",
+          password: "newpassword",
+          password_confirmation: "newpassword"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "期限切れトークンの場合、400を返す" do
+        user = create(:user, email: "expired-reset@example.com", password: "oldpassword", password_confirmation: "oldpassword")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "expired-reset-token",
+          token_expired_at: 1.hour.ago
+        )
+
+        post "/api/v1/password_reset/complete", params: {
+          token: token.token,
+          password: "newpassword",
+          password_confirmation: "newpassword"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "既に使用済みのトークンの場合、400を返す" do
+        user = create(:user, email: "used-reset@example.com", password: "oldpassword", password_confirmation: "oldpassword")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "used-reset-token",
+          token_expired_at: 1.hour.from_now,
+          used_at: Time.current
+        )
+
+        post "/api/v1/password_reset/complete", params: {
+          token: token.token,
+          password: "newpassword",
+          password_confirmation: "newpassword"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["error"]).to eq("このリンクは無効か、有効期限が切れています")
+      end
+
+      it "パスワードと確認用が空の場合、400を返す" do
+        user = create(:user, email: "empty@example.com", password: "oldpassword", password_confirmation: "oldpassword")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "empty-token",
+          token_expired_at: 1.hour.from_now
+        )
+
+        post "/api/v1/password_reset/complete", params: {
+          token: token.token,
+          password: "",
+          password_confirmation: ""
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]["password"]).to include("を入力してください")
+        expect(json_response["errors"]["password_confirmation"]).to include("を入力してください")
+      end
+
+      it "パスワードと確認用が一致しない場合、400を返す" do
+        user = create(:user, email: "mismatch@example.com", password: "oldpassword", password_confirmation: "oldpassword")
+        token = PasswordResetToken.create!(
+          user: user,
+          token: "mismatch-token",
+          token_expired_at: 1.hour.from_now
+        )
+
+        post "/api/v1/password_reset/complete", params: {
+          token: token.token,
+          password: "newpassword",
+          password_confirmation: "different"
+        }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response["errors"]["password_confirmation"]).to include("とパスワードが一致しません")
+      end
+    end
+  end
 end
 

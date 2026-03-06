@@ -54,6 +54,7 @@ Rails.application.routes.draw do
       scope :password_reset, controller: :password_reset do
         post "/", action: :create
         get  :verify
+        post :complete
       end
     end
   end
