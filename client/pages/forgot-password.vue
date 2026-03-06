@@ -8,7 +8,7 @@
         登録済みのメールアドレスを入力すると、パスワード再設定用のリンクをお送りします。
       </p>
 
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form v-if="!sent" @submit.prevent="handleSubmit" class="space-y-6">
         <div>
           <label
             for="email"
@@ -29,13 +29,6 @@
 
         <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
           {{ error }}
-        </div>
-
-        <div
-          v-if="successMessage"
-          class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm whitespace-pre-line"
-        >
-          {{ successMessage }}
         </div>
 
         <button
@@ -70,6 +63,13 @@
         </button>
       </form>
 
+      <div
+        v-else-if="successMessage"
+        class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm whitespace-pre-line"
+      >
+        {{ successMessage }}
+      </div>
+
       <div class="mt-6 text-center">
         <NuxtLink
           to="/login"
@@ -93,6 +93,7 @@ const email = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
+const sent = ref(false)
 
 const handleSubmit = async () => {
   error.value = null
@@ -123,6 +124,7 @@ const handleSubmit = async () => {
 
   successMessage.value = '入力されたメールアドレス宛てに、パスワード再設定用のリンクを送信しました。\n\n' +
     'メールが届かない場合は、メールアドレスをご確認のうえ、再度お試しください。'
+  sent.value = true
 }
 </script>
 
