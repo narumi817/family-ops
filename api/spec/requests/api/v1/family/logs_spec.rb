@@ -164,6 +164,24 @@ RSpec.describe "Api::V1::Family::Logs", type: :request do
         expect(log_ids).to include(log_family.id)
         expect(log_ids).not_to include(log_other_family.id)
       end
+
+      it "論理削除済みのログは一覧に含まれない" do
+        log1 = create(:log, user: user, task: task, performed_at: 2.days.ago)
+        log2 = create(:log, user: other_user, task: task, performed_at: 1.day.ago)
+
+        get "/api/v1/family/logs"
+        expect(response).to have_http_status(:ok)
+        log_ids = json_response["logs"].map { |l| l["id"] }
+        expect(log_ids).to include(log1.id, log2.id)
+
+        log1.update!(deleted_at: Time.current)
+
+        get "/api/v1/family/logs"
+        expect(response).to have_http_status(:ok)
+        log_ids = json_response["logs"].map { |l| l["id"] }
+        expect(log_ids).not_to include(log1.id)
+        expect(log_ids).to include(log2.id)
+      end
     end
 
     context "異常系" do

@@ -17,6 +17,21 @@ module Api
         render json: log_response(log), status: :created
       end
 
+      # 指定IDのログを論理削除する（自分のログのみ可）
+      # DELETE /api/v1/logs/:id
+      # @param id [Integer] ログID
+      # @return [JSON] 204 No Content
+      def destroy
+        log = Log.not_deleted.find_by(id: params[:id], user_id: current_user.id)
+
+        if log.nil?
+          return render json: { error: "ログが見つかりません" }, status: :not_found
+        end
+
+        log.update!(deleted_at: Time.current)
+        head :no_content
+      end
+
       private
 
       # ログ作成用のパラメータを取得する

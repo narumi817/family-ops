@@ -27,6 +27,10 @@ class Log < ApplicationRecord
   # @return [ActiveRecord::Relation] 指定されたユーザーIDのいずれかに該当するログのコレクション
   scope :for_family_users, ->(user_ids) { where(user_id: user_ids) }
 
+  # 論理削除されていないログ（deleted_at が nil）
+  # @return [ActiveRecord::Relation]
+  scope :not_deleted, -> { where(deleted_at: nil) }
+
   # @param date [Date, String] 日付（DateオブジェクトまたはYYYY-MM-DD形式の文字列）
   # @return [ActiveRecord::Relation] 指定された日付のログのコレクション
   scope :by_date, ->(date) {
@@ -43,7 +47,7 @@ class Log < ApplicationRecord
     # @return [ActiveRecord::Relation] フィルタリングされたログのコレクション
     # @note 日付パースで例外が発生した場合、日付フィルタを適用せずに全件を返す
     def for_family_with_filters(family_user_ids, date: nil, start_date: nil, end_date: nil)
-      logs = includes(:user, :task).for_family_users(family_user_ids)
+      logs = includes(:user, :task).not_deleted.for_family_users(family_user_ids)
 
       begin
         if date.present?
@@ -70,7 +74,7 @@ class Log < ApplicationRecord
     # @return [Integer] 累計ポイント
     def today_points_for_user(user_id, family_id, date: nil)
       date ||= Date.current
-      today_logs = by_user(user_id).by_date(date).includes(:task)
+      today_logs = not_deleted.by_user(user_id).by_date(date).includes(:task)
 
       today_logs.sum do |log|
         log.task.points_for_family(family_id)

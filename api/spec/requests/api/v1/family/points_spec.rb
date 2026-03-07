@@ -91,6 +91,22 @@ RSpec.describe "Api::V1::Family::Points", type: :request do
         expect(response).to have_http_status(:ok)
         expect(json_response["today_points"]).to eq(10) # 自分のログのみ
       end
+
+      it "論理削除済みのログは累計ポイントに含まれない" do
+        today = Date.current
+        log1 = create(:log, user: user, task: task1, performed_at: today.beginning_of_day + 1.hour)
+        create(:log, user: user, task: task2, performed_at: today.beginning_of_day + 2.hours)
+
+        get "/api/v1/family/points/today"
+        expect(response).to have_http_status(:ok)
+        expect(json_response["today_points"]).to eq(30) # 10 + 20
+
+        log1.update!(deleted_at: Time.current)
+
+        get "/api/v1/family/points/today"
+        expect(response).to have_http_status(:ok)
+        expect(json_response["today_points"]).to eq(20) # task2の分のみ（論理削除したlog1は含まれない）
+      end
     end
 
     context "異常系" do

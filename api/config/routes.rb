@@ -19,7 +19,7 @@ Rails.application.routes.draw do
       resource :greeting, only: [:show], controller: 'greeting'
 
       # 家事ログ
-      resources :logs, only: [:create]
+      resources :logs, only: [:create, :destroy]
 
       # 家族関連
       resources :families, only: [] do

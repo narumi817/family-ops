@@ -134,5 +134,70 @@ RSpec.describe "Api::V1::Logs", type: :request do
       end
     end
   end
+
+  describe "DELETE /api/v1/logs/:id" do
+    context "正常系" do
+      let(:user) { create(:user, password: "password123") }
+      let(:task) { create(:task) }
+      let!(:log) { create(:log, user: user, task: task) }
+
+      before do
+        post "/api/v1/login", params: { email: user.email, password: "password123" }
+      end
+
+      it "自分が登録したログを論理削除し、204を返す" do
+        expect {
+          delete "/api/v1/logs/#{log.id}"
+        }.not_to change(Log, :count)
+
+        expect(response).to have_http_status(:no_content)
+        expect(log.reload.deleted_at).to be_present
+      end
+    end
+
+    context "異常系" do
+      let(:user) { create(:user, password: "password123") }
+      let(:other_user) { create(:user, email: "other@example.com", password: "password123") }
+      let(:task) { create(:task) }
+      let!(:own_log) { create(:log, user: user, task: task) }
+      let!(:other_log) { create(:log, user: other_user, task: task) }
+
+      before do
+        post "/api/v1/login", params: { email: user.email, password: "password123" }
+      end
+
+      it "未ログインの場合、401を返す" do
+        delete "/api/v1/logout"
+        delete "/api/v1/logs/#{own_log.id}"
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(own_log.reload.deleted_at).to be_nil
+      end
+
+      it "他人のログを指定した場合、404を返す（存在を漏らさない）" do
+        delete "/api/v1/logs/#{other_log.id}"
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("ログが見つかりません")
+        expect(other_log.reload.deleted_at).to be_nil
+      end
+
+      it "存在しないログIDを指定した場合、404を返す" do
+        delete "/api/v1/logs/99999"
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("ログが見つかりません")
+      end
+
+      it "既に論理削除済みのログを指定した場合、404を返す" do
+        own_log.update!(deleted_at: Time.current)
+
+        delete "/api/v1/logs/#{own_log.id}"
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("ログが見つかりません")
+      end
+    end
+  end
 end
 
