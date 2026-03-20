@@ -18,16 +18,17 @@ services:
         value: production
       - key: RACK_ENV
         value: production
-      # DB 接続URL（Neon）
-      # Renderのダッシュボード上で DATABASE_URL を手動設定
       # CORS設定（クライアントのオリジンを許可）
       - key: ALLOWED_ORIGINS
         value: https://mizk.net,https://www.mizk.net
+      # Render のダッシュボードで設定する環境変数
+      # SECRET_KEY_BASE     : .secret_key ファイルの内容
+      # DATABASE_URL        : DB(Neon)の接続URL
       # メール送信設定（Resend）
-      # Render のダッシュボードで以下の環境変数を手動で設定してください:
       # RESEND_API_KEY      : Resend の API キー
       # RESEND_FROM_EMAIL   : 送信元メールアドレス (例: "FamilyOps <no-reply@your-domain>")
       # MAILER_HOST         : メール本文内リンクのホスト (例: family-ops-client.onrender.com)
+      # 
 
   # Nuxt 3 (frontend)
   - type: web
